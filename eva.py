@@ -4,7 +4,6 @@
 To run:
 mark as executable and run with arguments, if no arguments passed it takes defaults asterix file and debug_level
 
-
 Usage: eva.py [options]
 
 Options:
