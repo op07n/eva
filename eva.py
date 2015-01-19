@@ -634,6 +634,13 @@ for key in reversed(sorted(count)):
 
 
 '''_____________________________________________________________________________________________________________________
+
+search the missed...
+
+by now generate ONE (and only one) list of missed plots...
+
+TODO: generate lists of missed with track index...
+________________________________________________________________________________________________________________________
 '''
 
 if debug_level: print('Searching missed plots...')
@@ -742,7 +749,8 @@ gps_eval()
 
 testing gps plotting, read the gps tracks from the ascii file and store them in two arrays...
 
-TODO: -add option to evaluate gps tracks to switch on/off this function...
+TODO: -add option to evaluate gps tracks to switch on/off this function... DONE!
+TODO: evaluate the acurate... in a few days...
 ________________________________________________________________________________________________________________________
 """
 if options.gps_eval:
@@ -994,12 +1002,13 @@ if eval_mode == 'mlat':
                  lw=.7, color='r', ms=6) # end of track
 
 
-plt.plot(0, 0, marker='^', mfc='None', mec='b', linestyle='None', lw=.7, color='y', ms=6, label='Measured Plots')
-plt.plot(0, 0, marker='^', mfc='g', mec='k', linestyle='None', lw=.7, color='y', ms=6, label='Start of track')
-plt.plot(0, 0, marker='^', mfc='y', mec='k', linestyle='None', lw=.7, color='y', ms=6, label='End of track')
-plt.plot(0, 0, marker='^', mfc='r', mec='k', linestyle='None', ms=6, label='Calculated missed plots')
+plt.plot(0, 0, marker='^', mfc='None', mec='b', linestyle='-', lw=.7, color='y', ms=6, label='Measured Plots')
+plt.plot(0, 0, marker='^', mfc='g', mec='k', linestyle='-', lw=.7, color='y', ms=6, label='Start of track')
+plt.plot(0, 0, marker='^', mfc='y', mec='k', linestyle='-', lw=.7, color='y', ms=6, label='End of track')
+plt.plot(0, 0, marker='^', mfc='r', mec='k', linestyle='-', lw=.7, color='y', ms=6, label='Calculated missed plots')
 plt.plot(0, 0, marker='^', mfc='w', mec='w', linestyle='None', ms=10)
 plt.plot(0, 0, marker='*', mfc='k', mec='k', lw=2.0, linestyle='None', ms=8, label='SMR')
+if options.gps_eval: plt.plot(0, 0, marker='+', mfc='None', mec='k',linestyle='-',lw=.7, color='k', ms=6, label='GPS tracks')
 
 
 if debug_level: print('Plotting the missed plots...')
