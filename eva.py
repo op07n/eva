@@ -1121,7 +1121,18 @@ if gps and options.delay_analy:
     plt.savefig(filename + '_SUC_delay.pdf')
     # plt.savefig(filename + '_SUC_delay.png')
 
+
+    #plot the delays vs time, just to display some delays problems in RPS (2015/02/09)
+    d, dx = plt.subplots(1, figsize=(inches, inches/1.7778))
+    dx.plot(delta_t_SUC)
+    dx.plot(delta_t_plots)
+    dx.grid(True)
+    dx.set_title('Delays vs time')
+
+
 if debug_level: print('Execution time: %s' % (time.time() - secs))
+
+
 
 
 ########################################################################################################################
