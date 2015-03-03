@@ -588,7 +588,11 @@ for i in range(len(sortedlist) - 1):
 
 for i in range(len(sortedlist)-1):
   if (sortedlist[i + 1][5] != 'Start of Update Cycle') and (sortedlist[i + 1][5] != 'Periodic Status Message'):
-    CHN = CHN + [int(sortedlist[i+1][8])]
+    #print(sortedlist[i+1][8])
+    #print()
+    try: 
+      CHN = CHN + [float(sortedlist[i+1][8])]
+    except:  0
 #print(CHN)
 #print()
 #print()
@@ -734,7 +738,7 @@ print('| Missed plots: %s ' % missed_plots)
 print('| Total plots: %s  ' % plots_readed)
 print('| Expected plots: %s' % expected_plots)
 print('| P.D. = %.2f %%' % PD)
-print('| RPS number = %.2f %%' % CHN_inAnalysis)
+print('| RPS number = %.2f ' % CHN_inAnalysis)
 print('| SUC mean delay: %.2f ms' % suc_delay_mean)
 print('| SUC max delay: %.2f ms' % suc_delay_max)
 print('|_______________________________________________________________')
@@ -757,6 +761,8 @@ if debug_level and options.insert_stats:
     output_writer = csv.writer(fstat_csv, delimiter=',')
     output_writer.writerows(stat_csv_row)
     f.close()
+
+sys.exit("No plotting... stopping now")
 
 
 

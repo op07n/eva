@@ -1,0 +1,33 @@
+Batch Analisys Starts...
+Mon Mar  2 13:04:05 WET 2015
+filename:  /Volumes/UNTITLED 1/grabaciones/tenerife/smr/2015/01/01/000001.gps
+debug_level:  1
+batch_mode:  True
+speed_mode:  True
+eval_mode: smr
+gps_eval: False
+gps_filename: 20140220.txt
+display_map: True
+insert_stats: True
+Asterix tool alpha_0.500
+Option -s selected: Reading the sorted csv data file...
+Reading coordinates and timestamp of every plot...
+Counting plots in every track...
+Plots out of bounds and not used: 0
+Generating lists of tracks...
+Searching missed plots...
+Calculating statistics...
+ _______________________________________________________________
+| Analysis results:
+| Missed plots: 11 
+| Total plots: 492  
+| Expected plots: 503
+| P.D. = 97.81 %
+| RPS number = 1.00 
+| SUC mean delay: 95.58 ms
+| SUC max delay: 101.56 ms
+|_______________________________________________________________
+Saving statistics to statistics.csv file...
+Plotting the base map...
+Batch Analisys Ends...
+Mon Mar  2 13:04:13 WET 2015
