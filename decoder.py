@@ -398,5 +398,8 @@ def decode_SysStat(frame, offset):
 
     return NOGO, offset #At the moment only returns NOGO...
 
-
+def decode_PrePMess(frame, offset):
+    PrePmess = 0
+    offset += 1
+    return PrePmess, offset
 

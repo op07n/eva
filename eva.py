@@ -321,38 +321,41 @@ def decode_cat10(frame):
             if debug_level >= 4: print('Frame %s System Status: %s' % (frames_counter, NOGO))
         if FSPEC[2] & 2:
             if debug_level >= 3: print('Frame %s Calling decode_PrePMess()...' % (frames_counter))
-            #PrePmess, offset = decode_PrePMess(frame, offset)
+            PrePmess, offset = decode_PrePMess(frame, offset)
             if debug_level >= 4: print('Frame %s Pre-programmed Message: %s' % (frames_counter, PrePmess))
 
-    if len(FSPEC) >= 4:
-        if FSPEC[3] & 128:
-            if debug_level >= 3: print('Frame %s Calling decode_sigmaP()...' % (frames_counter))
-            #sigmaX, sigmaY, covariXY, offset = decode_sigmaP(frame, offset)
-            if debug_level >= 4: print('Frame %s Sx: %s, Sy: %s, Cxy: %s' % (frames_counter, sigmaX, sigmaY, covariXY))
-        if FSPEC[3] & 64:
-            if debug_level >= 3: print('Frame %s Calling decode_Presence()...' % (frames_counter))
-            #Presence, offset = decode_Presence(frame, offset)
-            if debug_level >= 4: print('Frame %s Presence: %s' % (frames_counter, Presence))
-        if FSPEC[3] & 32:
-            if debug_level >= 3: print('Frame %s Calling decode_AmpPPlot()...' % (frames_counter))
-            #AmpPPlot, offset = decode_AmpPPlot(frame, offset)
-            if debug_level >= 4: print('Frame %s Amplitude of Primary Plot: %s' % (frames_counter, AmpPPlot))
-        if FSPEC[3] & 16:
-            if debug_level >= 3: print('Frame %s Calling decode_CAccel()...' % (frames_counter))
-            #CAccelX, CAccelY, offset = decode_CAccel(frame, offset)
-            if debug_level >= 4: print('Frame %s CAccelX: %s, CAccelY: %s' % (frames_counter, CAccelX, CAccelY))
-        if FSPEC[3] & 8:
-            if debug_level >= 3: print('Frame %s Calling decode_SPARE()...' % (frames_counter))
-        #     SPARE, offset = decode_SPARE(frame, offset)
-        #     if debug_level >= 4: print('Frame %s SPARE: %s' % (frames_counter, SPARE))
-        if FSPEC[3] & 4:
-            if debug_level >= 3: print('Frame %s Calling decode_SField()...' % (frames_counter))
-            #SField, offset = decode_SField(frame, offset)
-            if debug_level >= 4: print('Frame %s SField: %s' % (frames_counter, SField))
-        if FSPEC[3] & 2:
-            if debug_level >= 3: print('Frame %s Calling decode_ResExpField()...' % (frames_counter))
-            #ResExpField, offset = decode_ResExpField(frame, offset)
-            if debug_level >= 4: print('Frame %s ResExpField: %s' % (frames_counter, ResExpField))
+
+            ## TODO: write the following functions!!!!!!!!!!!!!!!!!!!
+
+    # if len(FSPEC) >= 4:
+    #     if FSPEC[3] & 128:
+    #         if debug_level >= 3: print('Frame %s Calling decode_sigmaP()...' % (frames_counter))
+    #         #sigmaX, sigmaY, covariXY, offset = decode_sigmaP(frame, offset)
+    #         if debug_level >= 4: print('Frame %s Sx: %s, Sy: %s, Cxy: %s' % (frames_counter, sigmaX, sigmaY, covariXY))
+    #     if FSPEC[3] & 64:
+    #         if debug_level >= 3: print('Frame %s Calling decode_Presence()...' % (frames_counter))
+    #         #Presence, offset = decode_Presence(frame, offset)
+    #         if debug_level >= 4: print('Frame %s Presence: %s' % (frames_counter, Presence))
+    #     if FSPEC[3] & 32:
+    #         if debug_level >= 3: print('Frame %s Calling decode_AmpPPlot()...' % (frames_counter))
+    #         #AmpPPlot, offset = decode_AmpPPlot(frame, offset)
+    #         if debug_level >= 4: print('Frame %s Amplitude of Primary Plot: %s' % (frames_counter, AmpPPlot))
+    #     if FSPEC[3] & 16:
+    #         if debug_level >= 3: print('Frame %s Calling decode_CAccel()...' % (frames_counter))
+    #         #CAccelX, CAccelY, offset = decode_CAccel(frame, offset)
+    #         if debug_level >= 4: print('Frame %s CAccelX: %s, CAccelY: %s' % (frames_counter, CAccelX, CAccelY))
+    #     if FSPEC[3] & 8:
+    #         if debug_level >= 3: print('Frame %s Calling decode_SPARE()...' % (frames_counter))
+    #     #     SPARE, offset = decode_SPARE(frame, offset)
+    #     #     if debug_level >= 4: print('Frame %s SPARE: %s' % (frames_counter, SPARE))
+    #     if FSPEC[3] & 4:
+    #         if debug_level >= 3: print('Frame %s Calling decode_SField()...' % (frames_counter))
+    #         #SField, offset = decode_SField(frame, offset)
+    #         if debug_level >= 4: print('Frame %s SField: %s' % (frames_counter, SField))
+    #     if FSPEC[3] & 2:
+    #         if debug_level >= 3: print('Frame %s Calling decode_ResExpField()...' % (frames_counter))
+    #         #ResExpField, offset = decode_ResExpField(frame, offset)
+    #         if debug_level >= 4: print('Frame %s ResExpField: %s' % (frames_counter, ResExpField))
 
 
     # if it's a gps file: Decode the time of arriving to the recorder device:
@@ -484,8 +487,8 @@ if do_all:
     X = []
     Y = []
 
-    # for i in range(8166):  # toggle comment to read the entire file or a few frames..._________________________________
-    while True: 			#toggle comment to read the entire file or a few frames...__________________________________
+    for i in range(8166):  # toggle comment to read the entire file or a few frames..._________________________________
+    #while True: 			#toggle comment to read the entire file or a few frames...__________________________________
         cat = numpy.fromfile(f, numpy.int8, 1)
 
         if len(cat) == 0:
@@ -565,7 +568,8 @@ plots_outof_bounds =0
 for i in range(len(sortedlist) - 1):
 # for i in range(20000):
     if sortedlist[i + 1][24]:
-        if (int(sortedlist[i + 1][18]) > -2528) and (int(sortedlist[i + 1][18]) < 777) or eval_mode == 'mlat': # to eliminate the out of bounds...
+        #if (int(sortedlist[i + 1][18]) > -2528) and (int(sortedlist[i + 1][18]) < 777) or eval_mode == 'mlat': # to eliminate the out of bounds...
+        if True:
             lat, lon, x, t, y, trks, delta_t_plots = \
                 lat + [sortedlist[i + 1][14]],\
                 lon + [sortedlist[i + 1][15]],\
@@ -762,7 +766,7 @@ if debug_level and options.insert_stats:
     output_writer.writerows(stat_csv_row)
     f.close()
 
-sys.exit("No plotting... stopping now")
+# sys.exit("No plotting... stopping now")
 
 
 
@@ -828,10 +832,15 @@ if options.gps_eval:
 Center the mlat plots to the airport ARP and/or SMR coords...
 ________________________________________________________________________________________________________________________
 """
+Kx = 0.9999
+Ky = 0.9998
+theta = -0.6488 * 2 * math.pi / 360   #0.6380 translation theta....?????
+
+
 if eval_mode == 'smr':
-    Kx = 0.9999
-    Ky = 0.9998
-    theta = -0.6488 * 2 * math.pi / 360   #0.6380 translation theta....?????
+    # Kx = 0.9999
+    # Ky = 0.9998
+    # theta = -0.6488 * 2 * math.pi / 360   #0.6380 translation theta....?????
 
 
     for track in range(len(tracks_X)):
@@ -881,16 +890,21 @@ if eval_mode == 'mlat':
 
     for track in range(len(tracks_X)):
         for e in range(len(tracks_X[track])):
-            tracks_X[track][e] = float(tracks_X[track][e]) #+ delta_x
-            tracks_Y[track][e] = float(tracks_Y[track][e]) #+ delta_y
-            temp1 = tracks_X[track][e]*math.cos(theta)-tracks_Y[track][e]*math.sin(theta)
-            temp2 = tracks_X[track][e]*math.sin(theta)+tracks_Y[track][e]*math.cos(theta)
-            tracks_X[track][e] = temp1 * Kx
-            tracks_Y[track][e] = temp2 * Ky
+            if tracks_X[track][e] != '': 
+              tracks_X[track][e] = float(tracks_X[track][e]) #+ delta_x
+              tracks_Y[track][e] = float(tracks_Y[track][e]) #+ delta_y
+              temp1 = tracks_X[track][e]*math.cos(theta)-tracks_Y[track][e]*math.sin(theta)
+              temp2 = tracks_X[track][e]*math.sin(theta)+tracks_Y[track][e]*math.cos(theta)
+              tracks_X[track][e] = temp1 * Kx
+              tracks_Y[track][e] = temp2 * Ky
 
 
-            tracks_X[track][e] = float(tracks_X[track][e]) + delta_x
-            tracks_Y[track][e] = float(tracks_Y[track][e]) + delta_y
+              tracks_X[track][e] = float(tracks_X[track][e]) + delta_x
+              tracks_Y[track][e] = float(tracks_Y[track][e]) + delta_y
+
+
+            else: print(tracks_X[track][e])   # <---------------------------------DEBUGGING
+
 
 
     if debug_level: print('converting mlat geodetic lat/lon to UTM and centering to smr coords...')
