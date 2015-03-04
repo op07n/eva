@@ -554,7 +554,7 @@ else: # only read the sorted file...
     #reader = csv.reader(open('output_sorted.csv'), delimiter=",")
 
     sortedlist = sorted(reader, key=operator.itemgetter(24), reverse=True)  # <--------------------------------------0j0
-    if sortedlist[2][12] != None:
+    if sortedlist[2][12+1] != None:
         gps = 1
     else:
         gps = 0
@@ -567,17 +567,17 @@ t, lat, lon, x, y, trks, delta_t_plots, delta_t_SUC, CHN = [], [], [], [], [], [
 plots_outof_bounds =0
 for i in range(len(sortedlist) - 1):
 # for i in range(20000):
-    if sortedlist[i + 1][24]:
-        #if (int(sortedlist[i + 1][18]) > -2528) and (int(sortedlist[i + 1][18]) < 777) or eval_mode == 'mlat': # to eliminate the out of bounds...
-        if True:
+    if sortedlist[i + 1][24+1]:
+        if (int(sortedlist[i + 1][18+1]) > -2528) and (int(sortedlist[i + 1][18+1]) < 777) or eval_mode == 'mlat': # to eliminate the out of bounds...
+        #if True:
             lat, lon, x, t, y, trks, delta_t_plots = \
-                lat + [sortedlist[i + 1][14]],\
-                lon + [sortedlist[i + 1][15]],\
-                x + [sortedlist[i + 1][18]], \
-                t + [sortedlist[i + 1][11]], \
-                y + [sortedlist[i + 1][19]], \
-                trks + [sortedlist[i + 1][24]], \
-                delta_t_plots + [sortedlist[i+1][13]]# <-------------------------------------------------0j0
+                lat + [sortedlist[i + 1][14+1]],\
+                lon + [sortedlist[i + 1][15+1]],\
+                x + [sortedlist[i + 1][18+1]], \
+                t + [sortedlist[i + 1][11+1]], \
+                y + [sortedlist[i + 1][19+1]], \
+                trks + [sortedlist[i + 1][24+1]], \
+                delta_t_plots + [sortedlist[i+1][13+1]]# <-------------------------------------------------0j0
         else:
             plots_outof_bounds += 1
 
@@ -588,7 +588,7 @@ for i in range(len(sortedlist) - 1):
 
 for i in range(len(sortedlist) - 1):
     if sortedlist[i + 1][5] == 'Start of Update Cycle':
-        delta_t_SUC = delta_t_SUC + [sortedlist[i+1][13]]
+        delta_t_SUC = delta_t_SUC + [sortedlist[i+1][13+1]]
 
 for i in range(len(sortedlist)-1):
   if (sortedlist[i + 1][5] != 'Start of Update Cycle') and (sortedlist[i + 1][5] != 'Periodic Status Message'):
@@ -916,6 +916,7 @@ if eval_mode == 'mlat':
     for track in range(len(tracks_lat)):
     #for track in range(10):
         for e in range(len(tracks_lat[track])):
+          try:
             temp1 = [float(tracks_lat[track][e]), float(tracks_lon[track][e])]
             temp2 = (coord.LLtoUTM(temp1))
             tracks_mlat_X[track][e] = int(temp2[2])
@@ -926,7 +927,7 @@ if eval_mode == 'mlat':
 
             tracks_mlat_X[track][e] -= smr_xy[0]
             tracks_mlat_Y[track][e] -= smr_xy[1]
-
+          except: print("tracks_lat[track][e]:", tracks_lat[track][e])
 
             # if (tracks_mlat_X[track][e] != 0) and (tracks_Y[track][e] != 0):
             #     delta_theta.append(math.atan(tracks_mlat_Y[track][e]/tracks_mlat_X[track][e]) -
