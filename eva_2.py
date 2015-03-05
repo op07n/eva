@@ -774,7 +774,7 @@ if debug_level and options.insert_stats:
     output_writer.writerows(stat_csv_row)
     f.close()
 
-sys.exit("No plotting... stopping now")
+# sys.exit("No plotting... stopping now")
 
 
 
