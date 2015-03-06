@@ -225,12 +225,30 @@ def decode_cat10(frame):
     ModeA, \
     TADDR, \
     TID_ID, \
-    ModeS, VFI, FL, MeasHeight, TSize, TOri, TWidth, NOGO =\
-    None, None, None, None, None, None, None, None, None, None, None, None, \
+    ModeS, VFI, FL, MeasHeight, TSize, TOri, TWidth, \
+    NOGO, OVL, TSV, DIV, TTF, \
+    sigmaX, sigmaY, covariXY =\
     None, None, \
-    None, None, None, None, None, None, None, None, \
+    None, \
+    None, None, \
+    None, \
+    None, None, None, None, None, \
+    None, None, None, \
+    None, None, \
+    None, None, \
+    None, None, \
+    None, None, \
+    None, None, \
+    None, \
+    None, \
+    None, \
+    None, \
+    None, \
     None, None, None, None, None, None, None, \
-    None, None, None, None, None, None, None, None
+    None, None, None, None, None,\
+    None, None, None
+    # total by now: 44 fields.
+
     FSPEC, offset = read_fspec(frame)
     if debug_level >= 3: print('Frame %s FSPEC:	  %s,' % (frames_counter, binascii.hexlify(FSPEC)))
     if len(FSPEC) >= 1:
@@ -379,7 +397,9 @@ def decode_cat10(frame):
 
                 LAT, LON, RHO, THETA, X, Y, V_RHO, V_THETA, VX,
                 VY, TRACK, TRACK_STATUS10, ModeA, TADDR, TID_ID,
-                ModeS, VFI, FL, MeasHeight, TSize, TOri, TWidth, NOGO]]
+                ModeS, VFI, FL, MeasHeight, TSize, TOri, TWidth, 
+                NOGO, OVL, TSV, DIV, TTF,
+                sigmaX, sigmaY, covariXY, None, None, None, None, None, None]]
 
     output_writer.writerows(csv_row)
 
@@ -424,19 +444,32 @@ if do_all:
     # f_csv = open('./output.csv', 'w+', newline='')
     f_csv = open(filename + '.csv', 'w+', newline='')
     output_writer = csv.writer(f_csv, delimiter=',')
-    csv_header = [['Cat',       'Length',       'FSPEC',
-                   'DI I010/010 SAC',           'DI I010/010 SIC',
+    csv_header = [['Cat',       
+                   'Length',       
+                   'FSPEC',
+                   'DI I010/010 SAC',           
+                   'DI I010/010 SIC',
                    'DI I010/000 Message Type',
-                   'DI I010/020 TRD Type',      'DI I010/020 TRD DCR',    'DI I010/020 TRD CHN',
-                   'DI I010/020 TRD GBS',       'DI I010/020 TRD CRT',
+                   'DI I010/020 TRD Type',      
+                   'DI I010/020 TRD DCR',    
+                   'DI I010/020 TRD CHN',
+                   'DI I010/020 TRD GBS',       
+                   'DI I010/020 TRD CRT',
                    'DI I010/140 Time of Day',
-                   'ADD ON time at recorder',   'ADD ON delta(t)', # for delay analysis
-                   'DI I010/041 Lat',           'DI I010/041 Lon',
-                   'DI I010/040 Rho',           'DI I010/040 Theta',
-                   'DI I010/042 X',             'DI I010/042 Y',
-                   'DI I010/200 V_rho',         'DI I010/200 V_theta',
-                   'DI I010/202 V_x',           'DI I010/202 V_y',
-                   'DI I010/161 Track No.',     'DI I010/170 Track Status',
+                   'ADD ON time at recorder',   
+                   'ADD ON delta(t)', # for delay analysis
+                   'DI I010/041 Lat',           
+                   'DI I010/041 Lon',
+                   'DI I010/040 Rho',           
+                   'DI I010/040 Theta',
+                   'DI I010/042 X',             
+                   'DI I010/042 Y',
+                   'DI I010/200 V_rho',         
+                   'DI I010/200 V_theta',
+                   'DI I010/202 V_x',           
+                   'DI I010/202 V_y',
+                   'DI I010/161 Track No.',     
+                   'DI I010/170 Track Status',
                    'DI I010/060 ModeA',
                    'DI I010/220 Target Address',
                    'DI I010/245 Target ID',
@@ -444,10 +477,18 @@ if do_all:
                    'DI I010/300 Vehicle FID',
                    'DI I010/090 Fight Level',
                    'DI I010/091 Measured Height',
-                   'DI I010/270 T. Size ',     'DI I010/270 T. Orientation',   'DI I010/270 T. Width',
-                   'DI I010/550 System Status',
+                   'DI I010/270 T. Size ',     
+                   'DI I010/270 T. Orientation',   
+                   'DI I010/270 T. Width',
+                   'DI I010/550 System Status NOGO', 
+                   'DI I010/550 System Status OVL',
+                   'DI I010/550 System Status TSV', 
+                   'DI I010/550 System Status DIV',
+                   'DI I010/550 System Status TTF',
                    'DI I010/310 PreProgrammed Message',
-                   'DI I010/550 Standard Deviation of Position',
+                   'DI I010/550 Standard Deviation of Position sigmaX',
+                   'DI I010/550 Standard Deviation of Position sigmaY',
+                   'DI I010/550 Standard Deviation of Position covariXY',
                    'DI I010/280 Presence',
                    'DI I010/131 Amplitude of Primary Plot',
                    'DI I010/210 Calculated Acceleration',
@@ -487,8 +528,8 @@ if do_all:
     X = []
     Y = []
 
-    # for i in range(50000):  # toggle comment to read the entire file or a few frames..._________________________________
-    while True: 			#toggle comment to read the entire file or a few frames...__________________________________
+    for i in range(35000):  # toggle comment to read the entire file or a few frames..._________________________________
+    # while True: 			#toggle comment to read the entire file or a few frames...__________________________________
         cat = numpy.fromfile(f, numpy.int8, 1)
 
         if len(cat) == 0:
@@ -774,7 +815,7 @@ if debug_level and options.insert_stats:
     output_writer.writerows(stat_csv_row)
     f.close()
 
-sys.exit("No plotting... stopping now")
+# sys.exit("No plotting... stopping now")
 
 
 
