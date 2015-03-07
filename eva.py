@@ -335,7 +335,7 @@ def decode_cat10(frame):
             if debug_level >= 4: print('Frame %s Target Size: %s, Target Orientation: %s' % (frames_counter, TSize, TOri))
         if FSPEC[2] & 4:
             if debug_level >= 3: print('Frame %s Calling decode_SysStat()...' % (frames_counter))
-            NOGO, offset = decode_SysStat(frame, offset)
+            NOGO, OVL, TSV, DIV, TTF, offset = decode_SysStat(frame, offset)
             if debug_level >= 4: print('Frame %s System Status: %s' % (frames_counter, NOGO))
         if FSPEC[2] & 2:
             if debug_level >= 3: print('Frame %s Calling decode_PrePMess()...' % (frames_counter))
@@ -501,6 +501,10 @@ if do_all:
     if filename.find('.gps') != -1:
         if debug_level: print("GPS file...")
         gps = 1
+    
+
+    # print(gps)
+
 
     # Read the first BYTE and strip the GPS header if necesary...
     # BYTE = numpy.fromfile(f, numpy.uint8, 1)
@@ -528,8 +532,8 @@ if do_all:
     X = []
     Y = []
 
-    for i in range(35000):  # toggle comment to read the entire file or a few frames..._________________________________
-    # while True: 			#toggle comment to read the entire file or a few frames...__________________________________
+    # for i in range(35000):  # toggle comment to read the entire file or a few frames..._________________________________
+    while True: 			#toggle comment to read the entire file or a few frames...__________________________________
         cat = numpy.fromfile(f, numpy.int8, 1)
 
         if len(cat) == 0:
@@ -541,6 +545,11 @@ if do_all:
         frame_length.byteswap(True)
         f.seek(f.tell() - 3, 0)
         frame = numpy.fromfile(f, numpy.uint8, frame_length + gps * 10)
+
+        if len(frame) < frame_length: 
+            #if debug_level: print("EOF reached...")
+            break
+
         if debug_level >= 2: print("Frame %s Content: %s" % (frames_counter, binascii.hexlify(frame)))
         if debug_level >= 2: print("Frame %s Type:    %s, Asterix Cat.%s" % (frames_counter, hex(cat), cat))
         if debug_level >= 2: print("Frame %s Length:  %s, %s BYTEs" % (frames_counter, hex(frame_length), frame_length))
@@ -563,16 +572,40 @@ if do_all:
 
     if debug_level < 2: sys.stdout.write('\b')
     if debug_level: print("Total frames readed: %s" % (frames_counter))
+
     f.close()
+    f_csv.close()
 
     if debug_level: print('Output csv file plots generated...')
 
     if debug_level: print('Sorting and jointing plots in tracks...')
 
 
+
+
+    # try:
+    #     input("Press enter to continue")
+    # except SyntaxError:
+    #     pass
+
+
     # sorting the output data file...
-    reader = csv.reader(open(filename + '.csv'), delimiter=",")
+    # reader = csv.reader(open(filename + '.csv', newline=''), delimiter=",")
+    reader = csv.reader(open(filename + '.csv', newline=''), delimiter=",")
     sortedlist = sorted(reader, key=operator.itemgetter(24), reverse=True)  # <--------------------------------------0j0
+
+    print("------------------------->rows in the file: ",len(sortedlist))
+
+
+    # try:
+    #     input("Press enter to continue")
+    # except SyntaxError:
+    #     pass
+
+
+    #print(reader)
+    #print(filename)
+    #print("hey:",sortedlist)
 
 
     f_csv = open(filename + '.sorted.csv', 'w+', newline='')
@@ -583,22 +616,33 @@ if do_all:
     csv_row = sortedlist
     output_writer = csv.writer(f_csv, delimiter=',')
     output_writer.writerows(csv_row)
-    f.close()
+    f_csv.close()
 
     if debug_level: print('Sorted tracks csv file generated...')
 
 
 else: # only read the sorted file...
-    if debug_level: print('Option -s selected: Reading the sorted csv data file...')
-    # reader = csv.reader(open("./output_sorted.csv"), delimiter=",")
-    reader = csv.reader(open(filename + '.sorted.csv'), delimiter=",")
-    #reader = csv.reader(open('output_sorted.csv'), delimiter=",")
+    # print("else")
+    if debug_level: print('Option -s selected: Reading the csv data file...')
+    # reader = csv.reader(open(filename + '.sorted.csv', newline=''), delimiter=",")
+
+    #is better read the .csv file, not the sorted.csv. It may miss some lines, don't know why yet...
+    reader = csv.reader(open(filename + '.csv', newline=''), delimiter=",")
+    
 
     sortedlist = sorted(reader, key=operator.itemgetter(24), reverse=True)  # <--------------------------------------0j0
-    if sortedlist[2][12] != None:
-        gps = 1
-    else:
+    
+    print('------------------------->rows in the file: ',len(sortedlist))
+
+    #print(sortedlist[0][12])
+        
+    if sortedlist[1][12] == '':
         gps = 0
+    else:
+        gps = 1
+
+
+    #print(gps)
 
 
 # i=0
@@ -612,6 +656,9 @@ else: # only read the sorted file...
 if debug_level: print('Reading coordinates and timestamp of every plot...')
 
 t, lat, lon, x, y, trks, delta_t_plots, delta_t_SUC, CHN = [], [], [], [], [], [], [], [], []
+
+#print("heyyyyy",sortedlist)
+
 
 plots_outof_bounds =0
 for i in range(len(sortedlist) - 1):
@@ -641,11 +688,14 @@ for i in range(len(sortedlist) - 1):
 
 for i in range(len(sortedlist)-1):
   if (sortedlist[i + 1][5] != 'Start of Update Cycle') and (sortedlist[i + 1][5] != 'Periodic Status Message'):
-    #print(sortedlist[i+1][8])
-    #print()
+    # print(sortedlist[i+1][8])
+    # print("here")
     try: 
       CHN = CHN + [float(sortedlist[i+1][8])]
-    except:  0
+      # print(CHN)
+    except:  print("except:",CHN)
+  else: 0 #print("there")
+
 #print(CHN)
 #print()
 #print()
@@ -760,20 +810,28 @@ else: PD = 0.0
 PD *= 100
 PD = float("%.2f" % PD)
 
-for e in range(len(delta_t_plots)):
-    delta_t_plots[e] = 1000 * float(delta_t_plots[e])
-for i in range(len(delta_t_SUC)):
-    delta_t_SUC[i] = 1000 * float(delta_t_SUC[i])
+#print(gps)
+if gps:
+    for e in range(len(delta_t_plots)):
+        delta_t_plots[e] = 1000 * float(delta_t_plots[e])
+    for i in range(len(delta_t_SUC)):
+        delta_t_SUC[i] = 1000 * float(delta_t_SUC[i])
 
-CHN_inAnalysis = 1
+#CHN_inAnalysis = 1
+#print(CHN)
 CHN_inAnalysis = (sum(CHN)/len(CHN))
 # print(CHN_inAnalysis)
 # print(round(CHN_inAnalysis))
 
+if gps:
+    suc_delay_mean = sum(delta_t_SUC)/len(delta_t_SUC)
+    suc_delay_mean = float("%.2f" % suc_delay_mean)
+    suc_delay_max = float(max(delta_t_SUC))
+else:
+    suc_delay_mean = 0
+    suc_delay_mean = 0
+    suc_delay_max = 0
 
-suc_delay_mean = sum(delta_t_SUC)/len(delta_t_SUC)
-suc_delay_mean = float("%.2f" % suc_delay_mean)
-suc_delay_max = float(max(delta_t_SUC))
 notes = ' '
 
 date = str('2015-' + filename[-16:-14] + '-' + filename[-13:-11] + ' ' + filename[-10:-8] + ':00')

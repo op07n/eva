@@ -396,7 +396,8 @@ def decode_SysStat(frame, offset):
         TTF = 'Test Target Failure'
     else: TTF = 'Test Target Operative'
 
-    return NOGO, offset #At the moment only returns NOGO...
+    return NOGO, OVL, TSV, DIV, TTF, offset
+
 
 def decode_PrePMess(frame, offset):
     PrePmess = 0
