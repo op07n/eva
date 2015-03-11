@@ -2,6 +2,7 @@ __author__ = 'angelvidal'
 
 
 import numpy as numpy
+import binascii
 
 
 """_____________________________________________________________________________________________________________________
@@ -286,6 +287,22 @@ def decode_ModeA(frame, offset):
     ModeA = numpy.array([frame[offset]], dtype=numpy.uint16)
     offset += 1
     ModeA = ModeA & 0x0fff
+
+    # print(binascii.hexlify(ModeA))
+
+    # print(hex(ModeA))
+
+    # ModeA = ModeA << 4
+    # ModeA1 = ModeA << 3
+    # ModeA = ModeA << 3
+    # ModeA2 = ModeA << 3
+    # ModeA = ModeA << 3
+    # ModeA3 = ModeA << 3
+    # ModeA = ModeA << 3
+    # ModeA4 = ModeA << 3
+    
+    # print(oct(ModeA1),oct(ModeA2), oct(ModeA3), oct(ModeA4))
+    
     return int(ModeA), offset
 
 

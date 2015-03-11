@@ -594,7 +594,7 @@ if do_all:
     reader = csv.reader(open(filename + '.csv', newline=''), delimiter=",")
     sortedlist = sorted(reader, key=operator.itemgetter(24), reverse=True)  # <--------------------------------------0j0
 
-    print("------------------------->rows in the file: ",len(sortedlist))
+    # print("------------------------->rows in the file: ",len(sortedlist))
 
 
     # try:
@@ -632,7 +632,7 @@ else: # only read the sorted file...
 
     sortedlist = sorted(reader, key=operator.itemgetter(24), reverse=True)  # <--------------------------------------0j0
     
-    print('------------------------->rows in the file: ',len(sortedlist))
+    # print('------------------------->rows in the file: ',len(sortedlist))
 
     #print(sortedlist[0][12])
         
@@ -693,8 +693,8 @@ for i in range(len(sortedlist)-1):
     try: 
       CHN = CHN + [float(sortedlist[i+1][8])]
       # print(CHN)
-    except:  print("except:",CHN)
-  else: 0 #print("there")
+    except:  pass #print("except:",CHN)
+  else: pass #print("there")
 
 #print(CHN)
 #print()
@@ -857,8 +857,9 @@ print('|_______________________________________________________________')
 if debug_level and options.insert_stats:
     print('Saving statistics to statistics.csv file...')
 
-    reader = csv.reader(open('statistics.csv'), delimiter=",")
-    f.close()
+    fstat_csv = open('statistics.csv')
+    reader = csv.reader(fstat_csv, delimiter=",")
+    
 
     stat_list = sorted(reader, key=operator.itemgetter(0), reverse=True)
 
@@ -866,12 +867,22 @@ if debug_level and options.insert_stats:
 
     stat_list = sorted(stat_list, key=operator.itemgetter(0), reverse=True)
 
-
+    fstat_csv.close()
     fstat_csv = open('statistics.csv', 'w+', newline='')
     stat_csv_row = stat_list
     output_writer = csv.writer(fstat_csv, delimiter=',')
     output_writer.writerows(stat_csv_row)
-    f.close()
+    fstat_csv.close()
+
+    #save a local stat file for each analysis...
+    stat_list = []
+    stat_list.append(statistics)
+    stat_csv_row = stat_list
+    fstat_csv = open(filename + '.statistics.csv', 'w', newline='')
+    output_writer = csv.writer(fstat_csv, delimiter=',')
+    output_writer.writerows(stat_csv_row)
+    fstat_csv.close()
+
 
 # sys.exit("No plotting... stopping now")
 
