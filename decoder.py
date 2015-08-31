@@ -5,21 +5,22 @@ import numpy as numpy
 import binascii
 
 
-"""_____________________________________________________________________________________________________________________
+"""___________________________________________________________________________
 
 FUNCTIONS below this line!
-________________________________________________________________________________________________________________________
+______________________________________________________________________________
 """
 
 
-"""_____________________________________________________________________________________________________________________
+"""___________________________________________________________________________
 
 Asterix decoding code.
 TODO :
 1.- end cat10 decoder code
 2.- write cat21 decoder for SMMS
-3.- write cat 1 decode (for conventional SSR/PSR)? by now stand by... relax and end the first part
-________________________________________________________________________________________________________________________
+3.- write cat 1 decode (for conventional SSR/PSR)? by now stand by... 
+relax and end the first part
+______________________________________________________________________________
 """
 
 
@@ -51,16 +52,18 @@ def read_fspec(frame):
 
 
 def decode_cat21(frame):
-    """
+    '''
+
     Function to decode frames Asterix cat21
 
-    ***************************************       Pending to develop/write      ****************************************
+    *********************** Pending to develop/write *************************
 
     :param frame:
-    :return: csv file with decoded frames and csv with decoded frames sorted by track number
+    :return: csv file with decoded frames and csv with decoded frames sorted 
+    by track number
 
 
-    """
+    '''
     return None
 
 
@@ -319,7 +322,7 @@ def decode_TADDR(frame, offset):
 
 
 def decode_TID(frame, offset):
-    offset += 1                     # Caution HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! <-----------------------------------
+    offset += 1  # Caution HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! <------------
     TID_ID = numpy.array([frame[offset]], dtype=numpy.uint64)
     offset += 1
     TID_ID = TID_ID << 8
@@ -354,7 +357,7 @@ def decode_IcaoSixBitsChar(c):
         return ''
 
 
-# Write the following functions:________________________________________________________________________________________
+# Write the following functions:______________________________________________
 
 def decode_ModeS(frame, offset):
     ModeS = 0
