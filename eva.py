@@ -405,13 +405,19 @@ def decode_cat10(frame):
                       (frames_counter, TSize, TOri))
         if FSPEC[2] & 4:
             if debug_level >= 3:
-                print('Frame %s Calling decode_SysStat()...' % (frames_counter))
+                print('Frame %s Calling decode_SysStat()...' %
+                      (frames_counter))
             NOGO, OVL, TSV, DIV, TTF, offset = decode_SysStat(frame, offset)
-            if debug_level >= 4: print('Frame %s System Status: %s' % (frames_counter, NOGO))
+            if debug_level >= 4:
+                print('Frame %s System Status: %s' % (frames_counter, NOGO))
         if FSPEC[2] & 2:
-            if debug_level >= 3: print('Frame %s Calling decode_PrePMess()...' % (frames_counter))
+            if debug_level >= 3:
+                print('Frame %s Calling decode_PrePMess()...' %
+                      (frames_counter))
             PrePmess, offset = decode_PrePMess(frame, offset)
-            if debug_level >= 4: print('Frame %s Pre-programmed Message: %s' % (frames_counter, PrePmess))
+            if debug_level >= 4:
+                print('Frame %s Pre-programmed Message: %s' %
+                      (frames_counter, PrePmess))
 
 
             ## TODO: write the following functions!!!!!!!!!!!!!!!!!!!
@@ -450,7 +456,9 @@ def decode_cat10(frame):
     # if it's a gps file: Decode the time of arriving to the recorder device:
     # print(len(frame))
     if gps:
-        if debug_level >= 3: print('Frame %s Calling decode_TIME() at recording machine...' % (frames_counter))
+        if debug_level >= 3:
+            print('Frame %s Calling decode_TIME() at recording machine...' %
+                  (frames_counter))
         offset = len(frame) - 4
         # print(binascii.hexlify(frame[offset:offset+4]))
         time_at_rec, offset = decode_TIME(frame, offset)
@@ -478,11 +486,11 @@ def decode_cat10(frame):
 
 
 
-"""_____________________________________________________________________________________________________________________
+"""___________________________________________________________________________
 
 main()
 
-________________________________________________________________________________________________________________________
+______________________________________________________________________________
 """
 
 print("Asterix tool", __version__)
@@ -1391,7 +1399,8 @@ plt.savefig(filename + '.pdf')
 ##############################################################################
 # If gps file: plot histogram of plots delay and SUC delays...
 if gps and options.delay_analy:
-    f, (ax1, ax2) = plt.subplots(2, sharex=True, figsize=(inches, inches/1.7778))
+    f, (ax1, ax2) = plt.subplots(2, sharex=True,
+                                 figsize=(inches, inches/1.7778))
     ax1.hist(delta_t_plots, bins=100, color='r', histtype='stepfilled',
              normed=1, stacked=1)
     ax1.set_title('Plots time delay histogram')
