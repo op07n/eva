@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-
+# -*- coding: utf-8 -*-
 
 """
 To run:
@@ -89,7 +89,8 @@ parser.add_option("-f", "--file",
                   dest="filename",
                   help="data FILE to analyse",
                   metavar="filename",
-                  default="../../Asterix/SMR/04/21/080001.gps",
+                  default="080001.gps",
+                  # default="../../Asterix/SMR/04/21/080001.gps",
                   )
 
 parser.add_option("-l", "--debug_level",
@@ -524,7 +525,8 @@ if do_all:
     if debug_level:
         print("Creating the output.csv file: %s" % filename + '.csv')
     # f_csv = open('./output.csv', 'w+', newline='')
-    f_csv = open(filename + '.csv', 'w+', newline='')
+    # f_csv = open(filename + '.csv', 'w+', newline='') # 3.4
+    f_csv = open(filename + '.csv', 'w')  # 2.7
     output_writer = csv.writer(f_csv, delimiter=',')
     csv_header = [['Cat',       
                    'Length',       
@@ -683,7 +685,8 @@ if do_all:
 
     # sorting the output data file...
     # reader = csv.reader(open(filename + '.csv', newline=''), delimiter=",")
-    reader = csv.reader(open(filename + '.csv', newline=''), delimiter=",")
+    # reader = csv.reader(open(filename + '.csv', newline=''), delimiter=",")  # 3.4
+    reader = csv.reader(open(filename + '.csv'), delimiter=",")  # 2.7
 
     # <--------------------------------------0j0 AQUÍ ----------------------->
     sortedlist = sorted(reader, key=operator.itemgetter(24), reverse=True)
@@ -702,7 +705,9 @@ if do_all:
     #print("hey:",sortedlist)
 
 
-    f_csv = open(filename + '.sorted.csv', 'w+', newline='')
+    # f_csv = open(filename + '.sorted.csv', 'w+', newline='')  # 3.4
+    f_csv = open(filename + '.sorted.csv', 'w')  # 2.7
+    
     # f_csv = open('output_sorted.csv', 'w+', newline='')
 
 
