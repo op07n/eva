@@ -1,10 +1,8 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
+#!/usr/bin/python3
 
 """
 To run:
-mark as executable and run with arguments, if no arguments passed it takes 
-defaults asterix file and debug_level
+mark as executable and run with arguments, if no arguments passed it takes defaults asterix file and debug_level
 
 Usage: eva.py [options]
 
@@ -30,24 +28,22 @@ Options:
 
 TODO:
 
-1.- Associate aircraft tracks to gps tracks, by nearest (in time and space) 
-and calculate errors...
+1.- Associate aircraft tracks to gps tracks, by nearest (in time and space) and calculate errors...
 
 2.- Plot errors vs azimuth, vs range, vs x/y, etc...
 
-3.- Enhance code to interact user and graphics, ie: pick in a plot and open a 
-legend with track number, time, plot sizes...
+3.- Enhance code to interact user and graphics, ie: pick in a plot and open a legend with track number, time, plot sizes...
 
-4.- Export code to run in any machine without python installed on it, 
-pyinstaller, py2exe, etc... investigate in this
-line, maybe would be necessary to downgrade the code to python 2.7...??!!
+4.- Export code to run in any machine without python installed on it, pyinstaller, py2exe, etc... investigate in this
+line, maybe would be necessary to downgrade the code to python 2.7...??!!!!????!!!!???
 
-5.- Automate the analysis process to pick the file from the recorder, unzipit,
-analyse it, and save the results to the
-statistics file. Finally send the file to external server or update a web with
-the new data...
+5.- Automate the analysis process to pick the file from the recorder, unzipit, analyse it, and save the results to the
+statistics file. Finally send the file to external server or update a web with the new data...
 
-6.-...
+6.-
+
+
+
 
 
 """
@@ -89,8 +85,7 @@ parser.add_option("-f", "--file",
                   dest="filename",
                   help="data FILE to analyse",
                   metavar="filename",
-                  default="080001.gps",
-                  # default="../../Asterix/SMR/04/21/080001.gps",
+                  default="../../Asterix/SMR/04/21/080001.gps",
                   )
 
 parser.add_option("-l", "--debug_level",
@@ -109,8 +104,7 @@ parser.add_option("-b", "--batch_mode",
 
 parser.add_option("-s", "--speed_mode",
                   dest="speed_mode",
-                  help="don't decode the data file, just use the previous \
-                        decoded csv file...",
+                  help="don't decode the data file, just use the previous decoded csv file...",
                   metavar="do_all",
                   action="store_true",
                   default=False,
@@ -207,15 +201,14 @@ def definition():
     Used to define global var and etc...
     :return:
     """
-    return None  # Actually disabled
+    return None
+
+
     return TYP, DCR, CHN, GBS, CRT, offset
 
 
 def decode_cat10(frame):
-    '''
-    asterix cat 10 decoding function
 
-    '''
     cat, frame_length, \
     FSPEC, \
     SAC, SIC, \
@@ -232,193 +225,104 @@ def decode_cat10(frame):
     ModeA, \
     TADDR, \
     TID_ID, \
-    ModeS, VFI, FL, MeasHeight, TSize, TOri, TWidth, \
-    NOGO, OVL, TSV, DIV, TTF, \
-    sigmaX, sigmaY, covariXY =\
+    ModeS, VFI, FL, MeasHeight, TSize, TOri, TWidth, NOGO =\
+    None, None, None, None, None, None, None, None, None, None, None, None, \
     None, None, \
-    None, \
-    None, None, \
-    None, \
-    None, None, None, None, None, \
-    None, None, None, \
-    None, None, \
-    None, None, \
-    None, None, \
-    None, None, \
-    None, None, \
-    None, \
-    None, \
-    None, \
-    None, \
-    None, \
+    None, None, None, None, None, None, None, None, \
     None, None, None, None, None, None, None, \
-    None, None, None, None, None,\
-    None, None, None
-    # total by now: 44 fields.
-
+    None, None, None, None, None, None, None, None
     FSPEC, offset = read_fspec(frame)
-    if debug_level >= 3: print('Frame %s FSPEC:   %s,' % 
-                               (frames_counter, binascii.hexlify(FSPEC)))
+    if debug_level >= 3: print('Frame %s FSPEC:	  %s,' % (frames_counter, binascii.hexlify(FSPEC)))
     if len(FSPEC) >= 1:
         if FSPEC[0] & 128:
-            if debug_level >= 3:
-                print('Frame %s Calling decode_SIC_SAC()...' % (frames_counter))
+            if debug_level >= 3: print('Frame %s Calling decode_SIC_SAC()...' % (frames_counter))
             SIC, SAC, offset = decode_IDEN(frame, offset)
-            if debug_level >= 4:
-                print('Frame %s SIC: %s, SAC: %s' % (frames_counter, SIC, SAC))
+            if debug_level >= 4: print('Frame %s SIC: %s, SAC: %s' % (frames_counter, SIC, SAC))
         if FSPEC[0] & 64:
-            if debug_level >= 3:
-                print('Frame %s Calling decode_TYPE10()...' % (frames_counter))
+            if debug_level >= 3: print('Frame %s Calling decode_TYPE10()...' % (frames_counter))
             TYPE10, offset = decode_TYPE10(frame, offset)
-            if debug_level >= 4:
-                print('Frame %s TYPE10: %s' % (frames_counter, TYPE10))
+            if debug_level >= 4: print('Frame %s TYPE10: %s' % (frames_counter, TYPE10))
         if FSPEC[0] & 32:
-            if debug_level >= 3:
-                print('Frame %s Calling decode_TRD10()...' % (frames_counter))
-
-            TRD10_TYP, TRD10_DCR, TRD10_CHN, TRD10_GBS, TRD10_CRT, offset = \
-                decode_TRD10(frame, offset)
-
-            if debug_level >= 4:
-                print('Frame %s TRD10 TYPE: %s, TRD10 CHN: %s' %
-                      (frames_counter, TRD10_TYP, TRD10_CHN))
+            if debug_level >= 3: print('Frame %s Calling decode_TRD10()...' % (frames_counter))
+            TRD10_TYP, TRD10_DCR, TRD10_CHN, TRD10_GBS, TRD10_CRT, offset = decode_TRD10(frame, offset)
+            if debug_level >= 4: print('Frame %s TRD10 TYPE: %s, TRD10 CHN: %s' \
+                                       % (frames_counter, TRD10_TYP, TRD10_CHN))
         if FSPEC[0] & 16:
-            if debug_level >= 3: print('Frame %s Calling decode_TIME()...' % 
-                                       (frames_counter))
+            if debug_level >= 3: print('Frame %s Calling decode_TIME()...' % (frames_counter))
             TIME, offset = decode_TIME(frame, offset)
-            if debug_level >= 4:
-                print('Frame %s TIME: %s' % (frames_counter, TIME))
+            if debug_level >= 4: print('Frame %s TIME: %s' % (frames_counter, TIME))
         if FSPEC[0] & 8:
-            if debug_level >= 3:
-                print('Frame %s Calling decode_POS_WGS84()...' %
-                      (frames_counter))
+            if debug_level >= 3: print('Frame %s Calling decode_POS_WGS84()...' % (frames_counter))
             LAT, LON, offset = decode_POS_WGS84(frame, offset)
-            if debug_level >= 4:
-                print('Frame %s LAT, LON: %s, %s' % 
-                      (frames_counter, LAT, LON))
+            if debug_level >= 4: print('Frame %s LAT, LON: %s, %s' % (frames_counter, LAT, LON))
         if FSPEC[0] & 4:
-            if debug_level >= 3:
-                print('Frame %s Calling decode_POS_SPOL()...' %
-                      (frames_counter))
+            if debug_level >= 3: print('Frame %s Calling decode_POS_SPOL()...' % (frames_counter))
             RHO, THETA, offset = decode_POS_SPOL(frame, offset)
-            if debug_level >= 4:
-                print('Frame %s Rho, Theta: %s, %s' % 
-                      (frames_counter, RHO, THETA))
+            if debug_level >= 4: print('Frame %s Rho, Theta: %s, %s' % (frames_counter, RHO, THETA))
         if FSPEC[0] & 2:
-            if debug_level >= 3:
-                print('Frame %s Calling decode_POS_CART()...'%
-                      (frames_counter))
+            if debug_level >= 3: print('Frame %s Calling decode_POS_CART()...' % (frames_counter))
             X, Y, offset = decode_POS_CART(frame, offset)
-            if debug_level >= 4:
-                print('Frame %s X, Y: %s, %s' % (frames_counter, X, Y))
+            if debug_level >= 4: print('Frame %s X, Y: %s, %s' % (frames_counter, X, Y))
 
     if len(FSPEC) >= 2:
         if FSPEC[1] & 128:
-            if debug_level >= 3:
-                print('Frame %s Calling decode_CTV_POL()...' % 
-                      (frames_counter))
+            if debug_level >= 3: print('Frame %s Calling decode_CTV_POL()...' % (frames_counter))
             V_RHO, V_THETA, offset = decode_CTV_POL(frame, offset)
-            if debug_level >= 4:
-                print('Frame %s V_RHO: %s, V_THETA: %s' % 
-                      (frames_counter, V_RHO, V_THETA))
+            if debug_level >= 4: print('Frame %s V_RHO: %s, V_THETA: %s' % (frames_counter, V_RHO, V_THETA))
         if FSPEC[1] & 64:
-            if debug_level >= 3:
-                print('Frame %s Calling decode_CTV_CART()...' % 
-                      (frames_counter))
+            if debug_level >= 3: print('Frame %s Calling decode_CTV_CART()...' % (frames_counter))
             VX, VY, offset = decode_CTV_CART(frame, offset)
-            if debug_level >= 4:
-                print('Frame %s VX: %s, VY: %s' % 
-                      (frames_counter, VX, VY))
+            if debug_level >= 4: print('Frame %s VX: %s, VY: %s' % (frames_counter, VX, VY))
         if FSPEC[1] & 32:
-            if debug_level >= 3:
-                print('Frame %s Calling decode_TRACK()...' %
-                      (frames_counter))
+            if debug_level >= 3: print('Frame %s Calling decode_TRACK()...' % (frames_counter))
             TRACK, offset = decode_TRACK(frame, offset)
-            if debug_level >= 4:
-                print('Frame %s TRACK: %s' % 
-                      (frames_counter, TRACK))
+            if debug_level >= 4: print('Frame %s TRACK: %s' % (frames_counter, TRACK))
         if FSPEC[1] & 16:
-            if debug_level >= 3:
-                print('Frame %s Calling decode_TRACK_STATUS10()...' % 
-                      (frames_counter))
+            if debug_level >= 3: print('Frame %s Calling decode_TRACK_STATUS10()...' % (frames_counter))
             TRACK_STATUS10, offset = decode_TRACK_STATUS10(frame, offset)
-            if debug_level >= 4:
-                print('Frame %s TRACK_STATUS10: %s' %
-                      (frames_counter, TRACK_STATUS10))
+            if debug_level >= 4: print('Frame %s TRACK_STATUS10: %s' % (frames_counter, TRACK_STATUS10))
         if FSPEC[1] & 8:
-            if debug_level >= 3:
-                print('Frame %s Calling decode_ModeA()...' %
-                      (frames_counter))
+            if debug_level >= 3: print('Frame %s Calling decode_ModeA()...' % (frames_counter))
             ModeA, offset = decode_ModeA(frame, offset)
-            if debug_level >= 4:
-                print('Frame %s ModeA: %s, %s' %
-                      (frames_counter, hex(ModeA), oct(ModeA)))
+            if debug_level >= 4: print('Frame %s ModeA: %s, %s' % (frames_counter, hex(ModeA), oct(ModeA)))
         if FSPEC[1] & 4:
-            if debug_level >= 3:
-                print('Frame %s Calling decode_TADDR()...' %
-                      (frames_counter))
+            if debug_level >= 3: print('Frame %s Calling decode_TADDR()...' % (frames_counter))
             TADDR, offset = decode_TADDR(frame, offset)
-            if debug_level >= 4:
-                print('Frame %s TADDR: %s' %
-                      (frames_counter, TADDR))
+            if debug_level >= 4: print('Frame %s TADDR: %s' % (frames_counter, TADDR))
         if FSPEC[1] & 2:
-            if debug_level >= 3:
-                print('Frame %s Calling decode_TID()...' %
-                      (frames_counter))
+            if debug_level >= 3: print('Frame %s Calling decode_TID()...' % (frames_counter))
             TID_STI, TID_ID, offset = decode_TID(frame, offset)
-            if debug_level >= 4: print('Frame %s TID_ID: %s, TID_ID: %s' %
-                                       (frames_counter, TID_STI, TID_ID))
+            if debug_level >= 4: print('Frame %s TID_ID: %s, TID_ID: %s' % (frames_counter, TID_STI, TID_ID))
 
     if len(FSPEC) >= 3:
         if FSPEC[2] & 128:
-            if debug_level >= 3: print('Frame %s Calling decode_ModeS()...' %
-                                       (frames_counter))
+            if debug_level >= 3: print('Frame %s Calling decode_ModeS()...' % (frames_counter))
             ModeS, offset = decode_ModeS(frame, offset)
-            if debug_level >= 4: print('Frame %s ModeS: %s' %
-                                       (frames_counter, ModeS))
+            if debug_level >= 4: print('Frame %s ModeS: %s' % (frames_counter, ModeS))
         if FSPEC[2] & 64:
-            if debug_level >= 3: print('Frame %s Calling decode_VFI()...' %
-                                       (frames_counter))
+            if debug_level >= 3: print('Frame %s Calling decode_VFI()...' % (frames_counter))
             VFI, offset = decode_VFI(frame, offset)
-            if debug_level >= 4: print('Frame %s VFI: %s' %
-                                       (frames_counter, VFI))
+            if debug_level >= 4: print('Frame %s VFI: %s' % (frames_counter, VFI))
         if FSPEC[2] & 32:
-            if debug_level >= 3: print('Frame %s Calling decode_FL()...' %
-                                       (frames_counter))
+            if debug_level >= 3: print('Frame %s Calling decode_FL()...' % (frames_counter))
             FL, offset = decode_FL(frame, offset)
-            if debug_level >= 4: print('Frame %s FL: %s' %
-                (frames_counter, FL))
+            if debug_level >= 4: print('Frame %s FL: %s' % (frames_counter, FL))
         if FSPEC[2] & 16:
-            if debug_level >= 3:
-                print('Frame %s Calling decode_Meas_H()...' %
-                      (frames_counter))
+            if debug_level >= 3: print('Frame %s Calling decode_Meas_H()...' % (frames_counter))
             MeasHeight, offset = decode_Meas_H(frame, offset)
-            if debug_level >= 4:
-                print('Frame %s Meassured Height: %s' % 
-                      (frames_counter, MeasHeight))
+            if debug_level >= 4: print('Frame %s Meassured Height: %s' % (frames_counter, MeasHeight))
         if FSPEC[2] & 8:
-            if debug_level >= 3:
-                print('Frame %s Calling decode_TSizeOri()...' %
-                      (frames_counter))
+            if debug_level >= 3: print('Frame %s Calling decode_TSizeOri()...' % (frames_counter))
             TSize, TOri, TWidth, offset = decode_TSizeOri(frame, offset)
-            if debug_level >= 4:
-                print('Frame %s Target Size: %s, Target Orientation: %s' %
-                      (frames_counter, TSize, TOri))
+            if debug_level >= 4: print('Frame %s Target Size: %s, Target Orientation: %s' % (frames_counter, TSize, TOri))
         if FSPEC[2] & 4:
-            if debug_level >= 3:
-                print('Frame %s Calling decode_SysStat()...' %
-                      (frames_counter))
-            NOGO, OVL, TSV, DIV, TTF, offset = decode_SysStat(frame, offset)
-            if debug_level >= 4:
-                print('Frame %s System Status: %s' % (frames_counter, NOGO))
+            if debug_level >= 3: print('Frame %s Calling decode_SysStat()...' % (frames_counter))
+            NOGO, offset = decode_SysStat(frame, offset)
+            if debug_level >= 4: print('Frame %s System Status: %s' % (frames_counter, NOGO))
         if FSPEC[2] & 2:
-            if debug_level >= 3:
-                print('Frame %s Calling decode_PrePMess()...' %
-                      (frames_counter))
+            if debug_level >= 3: print('Frame %s Calling decode_PrePMess()...' % (frames_counter))
             PrePmess, offset = decode_PrePMess(frame, offset)
-            if debug_level >= 4:
-                print('Frame %s Pre-programmed Message: %s' %
-                      (frames_counter, PrePmess))
+            if debug_level >= 4: print('Frame %s Pre-programmed Message: %s' % (frames_counter, PrePmess))
 
 
             ## TODO: write the following functions!!!!!!!!!!!!!!!!!!!
@@ -457,9 +361,7 @@ def decode_cat10(frame):
     # if it's a gps file: Decode the time of arriving to the recorder device:
     # print(len(frame))
     if gps:
-        if debug_level >= 3:
-            print('Frame %s Calling decode_TIME() at recording machine...' %
-                  (frames_counter))
+        if debug_level >= 3: print('Frame %s Calling decode_TIME() at recording machine...' % (frames_counter))
         offset = len(frame) - 4
         # print(binascii.hexlify(frame[offset:offset+4]))
         time_at_rec, offset = decode_TIME(frame, offset)
@@ -477,9 +379,7 @@ def decode_cat10(frame):
 
                 LAT, LON, RHO, THETA, X, Y, V_RHO, V_THETA, VX,
                 VY, TRACK, TRACK_STATUS10, ModeA, TADDR, TID_ID,
-                ModeS, VFI, FL, MeasHeight, TSize, TOri, TWidth, 
-                NOGO, OVL, TSV, DIV, TTF,
-                sigmaX, sigmaY, covariXY, None, None, None, None, None, None]]
+                ModeS, VFI, FL, MeasHeight, TSize, TOri, TWidth, NOGO]]
 
     output_writer.writerows(csv_row)
 
@@ -487,11 +387,11 @@ def decode_cat10(frame):
 
 
 
-"""___________________________________________________________________________
+"""_____________________________________________________________________________________________________________________
 
 main()
 
-______________________________________________________________________________
+________________________________________________________________________________________________________________________
 """
 
 print("Asterix tool", __version__)
@@ -515,45 +415,28 @@ if debug_level < 2: spinner = spinning_cursor()
 
 
 if do_all:
-    if debug_level:
-        print('No speed up option selected: Decoding the binary file...')
+    if debug_level: print('No speed up option selected: Decoding the binary file...')
     definition()  # void function to init vars and other stuff...
 
-    if debug_level:
-        print("Opening the data file: %s" % filename)
+    if debug_level: print("Opening the data file: %s" % filename)
 
-    if debug_level:
-        print("Creating the output.csv file: %s" % filename + '.csv')
+    if debug_level: print("Creating the output.csv file: %s" % filename + '.csv')
     # f_csv = open('./output.csv', 'w+', newline='')
-    # f_csv = open(filename + '.csv', 'w+', newline='') # 3.4
-    f_csv = open(filename + '.csv', 'w')  # 2.7
+    f_csv = open(filename + '.csv', 'w+', newline='')
     output_writer = csv.writer(f_csv, delimiter=',')
-    csv_header = [['Cat',       
-                   'Length',       
-                   'FSPEC',
-                   'DI I010/010 SAC',           
-                   'DI I010/010 SIC',
+    csv_header = [['Cat',       'Length',       'FSPEC',
+                   'DI I010/010 SAC',           'DI I010/010 SIC',
                    'DI I010/000 Message Type',
-                   'DI I010/020 TRD Type',      
-                   'DI I010/020 TRD DCR',    
-                   'DI I010/020 TRD CHN',
-                   'DI I010/020 TRD GBS',       
-                   'DI I010/020 TRD CRT',
+                   'DI I010/020 TRD Type',      'DI I010/020 TRD DCR',    'DI I010/020 TRD CHN',
+                   'DI I010/020 TRD GBS',       'DI I010/020 TRD CRT',
                    'DI I010/140 Time of Day',
-                   'ADD ON time at recorder',   
-                   'ADD ON delta(t)', # for delay analysis
-                   'DI I010/041 Lat',           
-                   'DI I010/041 Lon',
-                   'DI I010/040 Rho',           
-                   'DI I010/040 Theta',
-                   'DI I010/042 X',             
-                   'DI I010/042 Y',
-                   'DI I010/200 V_rho',         
-                   'DI I010/200 V_theta',
-                   'DI I010/202 V_x',           
-                   'DI I010/202 V_y',
-                   'DI I010/161 Track No.',     
-                   'DI I010/170 Track Status',
+                   'ADD ON time at recorder',   'ADD ON delta(t)', # for delay analysis
+                   'DI I010/041 Lat',           'DI I010/041 Lon',
+                   'DI I010/040 Rho',           'DI I010/040 Theta',
+                   'DI I010/042 X',             'DI I010/042 Y',
+                   'DI I010/200 V_rho',         'DI I010/200 V_theta',
+                   'DI I010/202 V_x',           'DI I010/202 V_y',
+                   'DI I010/161 Track No.',     'DI I010/170 Track Status',
                    'DI I010/060 ModeA',
                    'DI I010/220 Target Address',
                    'DI I010/245 Target ID',
@@ -561,18 +444,10 @@ if do_all:
                    'DI I010/300 Vehicle FID',
                    'DI I010/090 Fight Level',
                    'DI I010/091 Measured Height',
-                   'DI I010/270 T. Size ',     
-                   'DI I010/270 T. Orientation',   
-                   'DI I010/270 T. Width',
-                   'DI I010/550 System Status NOGO', 
-                   'DI I010/550 System Status OVL',
-                   'DI I010/550 System Status TSV', 
-                   'DI I010/550 System Status DIV',
-                   'DI I010/550 System Status TTF',
+                   'DI I010/270 T. Size ',     'DI I010/270 T. Orientation',   'DI I010/270 T. Width',
+                   'DI I010/550 System Status',
                    'DI I010/310 PreProgrammed Message',
-                   'DI I010/550 Standard Deviation of Position sigmaX',
-                   'DI I010/550 Standard Deviation of Position sigmaY',
-                   'DI I010/550 Standard Deviation of Position covariXY',
+                   'DI I010/550 Standard Deviation of Position',
                    'DI I010/280 Presence',
                    'DI I010/131 Amplitude of Primary Plot',
                    'DI I010/210 Calculated Acceleration',
@@ -585,10 +460,6 @@ if do_all:
     if filename.find('.gps') != -1:
         if debug_level: print("GPS file...")
         gps = 1
-    
-
-    # print(gps)
-
 
     # Read the first BYTE and strip the GPS header if necesary...
     # BYTE = numpy.fromfile(f, numpy.uint8, 1)
@@ -605,8 +476,7 @@ if do_all:
         if debug_level: print('No GPS file, no header to strip...')
 
     if gps:
-        # Set the file pointer one step back to point the starting data frame
-        f.seek(f.tell() - 1, 0)
+        f.seek(f.tell() - 1, 0)  # Set the file pointer one step back to point the starting data frame
 
     # Read the Asterix frames
     frames_counter = 0
@@ -616,10 +486,9 @@ if do_all:
 
     X = []
     Y = []
-    # toggle comment to read the entire file or a few frames..._______________
-    # for i in range(35000):
-    #toggle comment to read the entire file or a few frames...________________
-    while True:
+
+    # for i in range(50000):  # toggle comment to read the entire file or a few frames..._________________________________
+    while True: 			#toggle comment to read the entire file or a few frames...__________________________________
         cat = numpy.fromfile(f, numpy.int8, 1)
 
         if len(cat) == 0:
@@ -631,29 +500,16 @@ if do_all:
         frame_length.byteswap(True)
         f.seek(f.tell() - 3, 0)
         frame = numpy.fromfile(f, numpy.uint8, frame_length + gps * 10)
-
-        if len(frame) < frame_length: 
-            #if debug_level: print("EOF reached...")
-            break
-
-        if debug_level >= 2:
-            print("Frame %s Content: %s" %
-                  (frames_counter, binascii.hexlify(frame)))
-        if debug_level >= 2:
-            print("Frame %s Type:    %s, Asterix Cat.%s" %
-                  (frames_counter, hex(cat), cat))
-        if debug_level >= 2:
-            print("Frame %s Length:  %s, %s BYTEs" %
-                  (frames_counter, hex(frame_length), frame_length))
+        if debug_level >= 2: print("Frame %s Content: %s" % (frames_counter, binascii.hexlify(frame)))
+        if debug_level >= 2: print("Frame %s Type:    %s, Asterix Cat.%s" % (frames_counter, hex(cat), cat))
+        if debug_level >= 2: print("Frame %s Length:  %s, %s BYTEs" % (frames_counter, hex(frame_length), frame_length))
 
         # call to other functions to decode the frame item's
-        if debug_level >= 3:
-            print('Frame %s Calling decode function...' % frames_counter)
+        if debug_level >= 3: print('Frame %s Calling decode function...' % frames_counter)
 
         # Decoding the frame:
         if cat == 10:
-            if debug_level >= 2:
-                print('Frame %s Calling decode_cat10()...' % (frames_counter))
+            if debug_level >= 2: print('Frame %s Calling decode_cat10()...' % (frames_counter))
             decode_cat10(frame)
 
         frames_counter += 1
@@ -666,48 +522,19 @@ if do_all:
 
     if debug_level < 2: sys.stdout.write('\b')
     if debug_level: print("Total frames readed: %s" % (frames_counter))
-
     f.close()
-    f_csv.close()
 
     if debug_level: print('Output csv file plots generated...')
 
     if debug_level: print('Sorting and jointing plots in tracks...')
 
 
-
-
-    # try:
-    #     input("Press enter to continue")
-    # except SyntaxError:
-    #     pass
-
-
     # sorting the output data file...
-    # reader = csv.reader(open(filename + '.csv', newline=''), delimiter=",")
-    # reader = csv.reader(open(filename + '.csv', newline=''), delimiter=",")  # 3.4
-    reader = csv.reader(open(filename + '.csv'), delimiter=",")  # 2.7
-
-    # <--------------------------------------0j0 AQUÍ ----------------------->
-    sortedlist = sorted(reader, key=operator.itemgetter(24), reverse=True)
-
-    # print("------------------------->rows in the file: ",len(sortedlist))
+    reader = csv.reader(open(filename + '.csv'), delimiter=",")
+    sortedlist = sorted(reader, key=operator.itemgetter(24), reverse=True)  # <--------------------------------------0j0
 
 
-    # try:
-    #     input("Press enter to continue")
-    # except SyntaxError:
-    #     pass
-
-
-    #print(reader)
-    #print(filename)
-    #print("hey:",sortedlist)
-
-
-    # f_csv = open(filename + '.sorted.csv', 'w+', newline='')  # 3.4
-    f_csv = open(filename + '.sorted.csv', 'w')  # 2.7
-    
+    f_csv = open(filename + '.sorted.csv', 'w+', newline='')
     # f_csv = open('output_sorted.csv', 'w+', newline='')
 
 
@@ -715,36 +542,22 @@ if do_all:
     csv_row = sortedlist
     output_writer = csv.writer(f_csv, delimiter=',')
     output_writer.writerows(csv_row)
-    f_csv.close()
+    f.close()
 
-    if debug_level:
-        print('Sorted tracks csv file generated...')
+    if debug_level: print('Sorted tracks csv file generated...')
 
 
 else: # only read the sorted file...
-    # print("else")
-    if debug_level:
-        print('Option -s selected: Reading the csv data file...')
-    # reader = csv.reader(open(filename + '.sorted.csv', newline=''), delimiter=",")
+    if debug_level: print('Option -s selected: Reading the sorted csv data file...')
+    # reader = csv.reader(open("./output_sorted.csv"), delimiter=",")
+    reader = csv.reader(open(filename + '.sorted.csv'), delimiter=",")
+    #reader = csv.reader(open('output_sorted.csv'), delimiter=",")
 
-    #is better read the .csv file, not the sorted.csv. 
-    # It may miss some lines, don't know why yet...
-    reader = csv.reader(open(filename + '.csv', newline=''), delimiter=",")
-    
-    # <--------------------------------------0j0
-    sortedlist = sorted(reader, key=operator.itemgetter(24), reverse=True)
-    
-    # print('------------------------->rows in the file: ',len(sortedlist))
-
-    #print(sortedlist[0][12])
-        
-    if sortedlist[1][12] == '':
-        gps = 0
-    else:
+    sortedlist = sorted(reader, key=operator.itemgetter(24), reverse=True)  # <--------------------------------------0j0
+    if sortedlist[2][12] != None:
         gps = 1
-
-
-    #print(gps)
+    else:
+        gps = 0
 
 
 # i=0
@@ -757,19 +570,13 @@ else: # only read the sorted file...
 
 if debug_level: print('Reading coordinates and timestamp of every plot...')
 
-t, lat, lon, x, y, trks, delta_t_plots, delta_t_SUC, CHN = \
-    [], [], [], [], [], [], [], [], []
-
-#print("heyyyyy",sortedlist)
-
+t, lat, lon, x, y, trks, delta_t_plots, delta_t_SUC, CHN = [], [], [], [], [], [], [], [], []
 
 plots_outof_bounds =0
 for i in range(len(sortedlist) - 1):
 # for i in range(20000):
     if sortedlist[i + 1][24]:
-        # if (int(sortedlist[i + 1][18]) > -2528) and
-        # (int(sortedlist[i + 1][18+1]) < 777) or eval_mode == 'mlat':
-        # to eliminate the out of bounds...
+        # if (int(sortedlist[i + 1][18]) > -2528) and (int(sortedlist[i + 1][18+1]) < 777) or eval_mode == 'mlat': # to eliminate the out of bounds...
         if True:
             lat, lon, x, t, y, trks, delta_t_plots = \
                 lat + [sortedlist[i + 1][14]],\
@@ -778,7 +585,7 @@ for i in range(len(sortedlist) - 1):
                 t + [sortedlist[i + 1][11]], \
                 y + [sortedlist[i + 1][19]], \
                 trks + [sortedlist[i + 1][24]], \
-                delta_t_plots + [sortedlist[i+1][13]]  # <-----------------0j0
+                delta_t_plots + [sortedlist[i+1][13]]# <-------------------------------------------------0j0
         else:
             plots_outof_bounds += 1
 
@@ -792,16 +599,12 @@ for i in range(len(sortedlist) - 1):
         delta_t_SUC = delta_t_SUC + [sortedlist[i+1][13]]
 
 for i in range(len(sortedlist)-1):
-  if (sortedlist[i + 1][5] != 'Start of Update Cycle') and \
-      (sortedlist[i + 1][5] != 'Periodic Status Message'):
-    # print(sortedlist[i+1][8])
-    # print("here")
+  if (sortedlist[i + 1][5] != 'Start of Update Cycle') and (sortedlist[i + 1][5] != 'Periodic Status Message'):
+    #print(sortedlist[i+1][8])
+    #print()
     try: 
       CHN = CHN + [float(sortedlist[i+1][8])]
-      # print(CHN)
-    except:  pass #print("except:",CHN)
-  else: pass #print("there")
-
+    except:  0
 #print(CHN)
 #print()
 #print()
@@ -822,12 +625,11 @@ for trk in trks:
 if debug_level >= 6: print('Count{}: %s' % count)
 
 
-'''___________________________________________________________________________
+'''_____________________________________________________________________________________________________________________
 generates list of tracks [x1, x2, x3...]
 '''
 
-if debug_level:
-    print('Generating lists of tracks...')
+if debug_level: print('Generating lists of tracks...')
 
 tracks_X = []
 tracks_Y = []
@@ -857,14 +659,14 @@ for key in reversed(sorted(count)):
 # print(tracks_lon)
 
 
-'''___________________________________________________________________________
+'''_____________________________________________________________________________________________________________________
 
 search the missed...
 
 by now generate ONE (and only one) list of missed plots...
 
 TODO: generate lists of missed with track index...
-______________________________________________________________________________
+________________________________________________________________________________________________________________________
 '''
 
 if debug_level: print('Searching missed plots...')
@@ -880,34 +682,25 @@ for key in reversed(sorted(count)):
         try:
             x1, y1 = float(x[j + i]), float(y[j + i])
             x2, y2 = float(x[j + i + 1]), float(y[j + i + 1])
-            if debug_level >= 6:
-                print('t1 = %s' % (t[j + i]))
-            if debug_level >= 6:
-                print('t2 = %s' % (t[j + i + 1]))
+            if debug_level >= 6: print('t1 = %s' % (t[j + i]))
+            if debug_level >= 6: print('t2 = %s' % (t[j + i + 1]))
             dt = abs(float(t[j + i + 1]) - float(t[j + i]))
-            if debug_level >= 6:
-                print('dt: %s' % dt)
-            if debug_level >= 6:
-                print('dt: %s' % round(dt))
+            if debug_level >= 6: print('dt: %s' % dt)
+            if debug_level >= 6: print('dt: %s' % round(dt))
             if (dt >= 1.1) and (dt <= 20) and (trks[j + i + 1] == trks[j + i]):
-                if debug_level >= 5:
-                    print('Missed found!, dt= %s <--------' % dt)
+                if debug_level >= 5: print('Missed found!, dt= %s <--------' % dt)
                 x1, y1 = float(x[j + i]), float(y[j + i])
                 x2, y2 = float(x[j + i + 1]), float(y[j + i + 1])
                 xi, yi = x1, y1
-                if debug_level >= 5:
-                    print('(x1,y1)= %s, %s' % (x1, y1))
-                if debug_level >= 5:
-                    print('(x2,y2)= %s, %s' % (x2, y2))
+                if debug_level >= 5: print('(x1,y1)= %s, %s' % (x1, y1))
+                if debug_level >= 5: print('(x2,y2)= %s, %s' % (x2, y2))
                 for k in range(round(dt) - 1):
-                    if debug_level >= 5:
-                        print('iteration %s' % k)
+                    if debug_level >= 5: print('iteration %s' % k)
                     xi = (xi + (x2 - x1) / round(dt))
                     yi = (yi + (y2 - y1) / round(dt))
                     xm = xm + [xi]
                     ym = ym + [yi]
-                    if debug_level >= 5:
-                        print('xi: %s, yi: %s' % (xi, yi))
+                    if debug_level >= 5: print('xi: %s, yi: %s' % (xi, yi))
         # else:
         except:
             # print('Exception reached...')
@@ -926,40 +719,30 @@ else: PD = 0.0
 PD *= 100
 PD = float("%.2f" % PD)
 
-#print(gps)
-if gps:
-    for e in range(len(delta_t_plots)):
-        delta_t_plots[e] = 1000 * float(delta_t_plots[e])
-    for i in range(len(delta_t_SUC)):
-        delta_t_SUC[i] = 1000 * float(delta_t_SUC[i])
+for e in range(len(delta_t_plots)):
+    delta_t_plots[e] = 1000 * float(delta_t_plots[e])
+for i in range(len(delta_t_SUC)):
+    delta_t_SUC[i] = 1000 * float(delta_t_SUC[i])
 
-#CHN_inAnalysis = 1
-#print(CHN)
+CHN_inAnalysis = 1
 CHN_inAnalysis = (sum(CHN)/len(CHN))
 # print(CHN_inAnalysis)
 # print(round(CHN_inAnalysis))
 
-if gps:
-    suc_delay_mean = sum(delta_t_SUC)/len(delta_t_SUC)
-    suc_delay_mean = float("%.2f" % suc_delay_mean)
-    suc_delay_max = float(max(delta_t_SUC))
-else:
-    suc_delay_mean = 0
-    suc_delay_mean = 0
-    suc_delay_max = 0
 
+suc_delay_mean = sum(delta_t_SUC)/len(delta_t_SUC)
+suc_delay_mean = float("%.2f" % suc_delay_mean)
+suc_delay_max = float(max(delta_t_SUC))
 notes = ' '
 
-date = str('2015-' + filename[-16:-14] + '-' + filename[-13:-11] + ' ' +
-    filename[-10:-8] + ':00')
+date = str('2015-' + filename[-16:-14] + '-' + filename[-13:-11] + ' ' + filename[-10:-8] + ':00')
 # print(date)
 
 
 
 
 statistics = [date, PD, plots_readed, expected_plots, missed_plots,
-              plots_outof_bounds, suc_delay_mean, suc_delay_max,
-              CHN_inAnalysis, notes]
+              plots_outof_bounds, suc_delay_mean, suc_delay_max, CHN_inAnalysis, notes]
 
 print(' _______________________________________________________________')
 print('| Analysis results:')
@@ -975,9 +758,8 @@ print('|_______________________________________________________________')
 if debug_level and options.insert_stats:
     print('Saving statistics to statistics.csv file...')
 
-    fstat_csv = open('statistics.csv')
-    reader = csv.reader(fstat_csv, delimiter=",")
-    
+    reader = csv.reader(open('statistics.csv'), delimiter=",")
+    f.close()
 
     stat_list = sorted(reader, key=operator.itemgetter(0), reverse=True)
 
@@ -985,37 +767,26 @@ if debug_level and options.insert_stats:
 
     stat_list = sorted(stat_list, key=operator.itemgetter(0), reverse=True)
 
-    fstat_csv.close()
+
     fstat_csv = open('statistics.csv', 'w+', newline='')
     stat_csv_row = stat_list
     output_writer = csv.writer(fstat_csv, delimiter=',')
     output_writer.writerows(stat_csv_row)
-    fstat_csv.close()
-
-    #save a local stat file for each analysis...
-    stat_list = []
-    stat_list.append(statistics)
-    stat_csv_row = stat_list
-    fstat_csv = open(filename + '.statistics.csv', 'w', newline='')
-    output_writer = csv.writer(fstat_csv, delimiter=',')
-    output_writer.writerows(stat_csv_row)
-    fstat_csv.close()
-
+    f.close()
 
 # sys.exit("No plotting... stopping now")
 
 
 
-"""___________________________________________________________________________
+"""_____________________________________________________________________________________________________________________
 
 gps_eval()
 
-testing gps plotting, read the gps tracks from the ascii file and store them
-in two arrays...
+testing gps plotting, read the gps tracks from the ascii file and store them in two arrays...
 
-TODO: -add option to evaluate gps tracks to switch on/off this function: DONE!
+TODO: -add option to evaluate gps tracks to switch on/off this function... DONE!
 TODO: evaluate the acurate... in a few days...
-______________________________________________________________________________
+________________________________________________________________________________________________________________________
 """
 if options.gps_eval:
 
@@ -1038,10 +809,8 @@ if options.gps_eval:
     for r in  csv.reader(open(options.gps_filename), delimiter='\t'):
         gps_lat = gps_lat + [float(r[1])]
         gps_lon = gps_lon + [float(r[2])]
-        # timegps = timegps + [(datetime.datetime.strptime(
-        #    ' '+ r[5], " %H %M %S.%f "))]
-        timegps = timegps + [(datetime.datetime.strptime(' '+ r[5] +
-            ' ', " %H %M %S.%f "))]
+        #timegps = timegps + [(datetime.datetime.strptime(' '+ r[5], " %H %M %S.%f "))]
+        timegps = timegps + [(datetime.datetime.strptime(' '+ r[5] + ' ', " %H %M %S.%f "))]
 
     print('Total gps points: ', len(lat))
     # print(lat[1], lon[1], timegps[1])
@@ -1060,17 +829,16 @@ if options.gps_eval:
         gps_trky[e] -= smr_xy[1]
 
     # if eval_mode == 'mlat':
-    #     if debug_level: print('evaluating mlat,\
-    #    centering plots in ARP coords...')
+    #     if debug_level: print('evaluating mlat, centering plots in ARP coords...')
     #     for e in range(len(gps_trkx)):
     #         gps_trkx[e] -= mlat_xy[0]
     #         gps_trky[e] -= mlat_xy[1]
 
 
-"""___________________________________________________________________________
+"""_____________________________________________________________________________________________________________________
 
 Center the mlat plots to the airport ARP and/or SMR coords...
-______________________________________________________________________________
+________________________________________________________________________________________________________________________
 """
 Kx = 0.9999
 Ky = 0.9998
@@ -1087,18 +855,16 @@ if eval_mode == 'smr':
         for e in range(len(tracks_X[track])):
             tracks_X[track][e] = float(tracks_X[track][e]) #+ delta_x
             tracks_Y[track][e] = float(tracks_Y[track][e]) #+ delta_y
-            temp1 = tracks_X[track][e] * math.cos(theta) -\
-                tracks_Y[track][e] * math.sin(theta)
-            temp2 = tracks_X[track][e] * math.sin(theta) +\
-                tracks_Y[track][e] * math.cos(theta)
+            temp1 = tracks_X[track][e]*math.cos(theta)-tracks_Y[track][e]*math.sin(theta)
+            temp2 = tracks_X[track][e]*math.sin(theta)+tracks_Y[track][e]*math.cos(theta)
             tracks_X[track][e] = temp1 * Kx
             tracks_Y[track][e] = temp2 * Ky
 
 
 # centering the missed...
 for e in range(len(xm)):
-    temp1 = xm[e] * math.cos(theta) - ym[e] * math.sin(theta)
-    temp2 = xm[e] * math.sin(theta) + ym[e] * math.cos(theta)
+    temp1 = xm[e]*math.cos(theta)-ym[e]*math.sin(theta)
+    temp2 = xm[e]*math.sin(theta)+ym[e]*math.cos(theta)
     xm[e] = temp1 * Kx
     ym[e] = temp2 * Ky
 
@@ -1124,8 +890,7 @@ if eval_mode == 'mlat':
     delta_y = mlat_xy[1] - smr_xy[1]
     #print(delta_x, delta_y)
 
-    if debug_level:
-        print('centering mlat cartesian x/y to smr coords...')
+    if debug_level: print('centering mlat cartesian x/y to smr coords...')
 
     Kx = 0.9999
     Ky = 0.9998
@@ -1136,27 +901,24 @@ if eval_mode == 'mlat':
             if tracks_X[track][e] != '': 
               tracks_X[track][e] = float(tracks_X[track][e]) #+ delta_x
               tracks_Y[track][e] = float(tracks_Y[track][e]) #+ delta_y
-              temp1 = tracks_X[track][e] * math.cos(theta) -\
-                  tracks_Y[track][e] * math.sin(theta)
-              temp2 = tracks_X[track][e] * math.sin(theta) +\
-                  tracks_Y[track][e] * math.cos(theta)
+              temp1 = tracks_X[track][e]*math.cos(theta)-tracks_Y[track][e]*math.sin(theta)
+              temp2 = tracks_X[track][e]*math.sin(theta)+tracks_Y[track][e]*math.cos(theta)
               tracks_X[track][e] = temp1 * Kx
               tracks_Y[track][e] = temp2 * Ky
+
 
               tracks_X[track][e] = float(tracks_X[track][e]) + delta_x
               tracks_Y[track][e] = float(tracks_Y[track][e]) + delta_y
 
-            else:
-                print(tracks_X[track][e])   # <----------------------DEBUGGING
+
+            else: print(tracks_X[track][e])   # <---------------------------------DEBUGGING
 
 
 
-    if debug_level:
-        print('converting mlat geodetic lat/lon to UTM and centering to smr\
-              coords...')
+    if debug_level: print('converting mlat geodetic lat/lon to UTM and centering to smr coords...')
 
-    # just to fill the arrays...
-    tracks_mlat_X, tracks_mlat_Y = tracks_lat, tracks_lon
+    tracks_mlat_X, tracks_mlat_Y = tracks_lat, tracks_lon # just to fill the arrays...
+
     delta_theta = []
 
     for track in range(len(tracks_lat)):
@@ -1175,6 +937,10 @@ if eval_mode == 'mlat':
             tracks_mlat_Y[track][e] -= smr_xy[1]
           except: print("tracks_lat[track][e]:", tracks_lat[track][e])
 
+            # if (tracks_mlat_X[track][e] != 0) and (tracks_Y[track][e] != 0):
+            #     delta_theta.append(math.atan(tracks_mlat_Y[track][e]/tracks_mlat_X[track][e]) -
+            #                   math.atan(tracks_Y[track][e]/tracks_Y[track][e]))
+
     # print(max(delta_theta))
     # print(min(delta_theta))
     # print(sum(delta_theta)/len(delta_theta))
@@ -1183,12 +949,12 @@ if eval_mode == 'mlat':
     # ax1.hist(delta_theta, bins=100, color='r', normed=1, stacked=1)
     # plt.show()
 
-"""___________________________________________________________________________
+"""_____________________________________________________________________________________________________________________
 
 Plotting()
 
 plot plots and delay histograms(if it's a gps recording)
-______________________________________________________________________________
+________________________________________________________________________________________________________________________
 """
 
 inches = 16
@@ -1225,8 +991,7 @@ if options.display_map:
             lines_y.append(polylines[i].points[j][1])
             # print(lines_x)
 
-        plt.plot(lines_x, lines_y, marker='None', mfc='None', mec='b',
-            linestyle='-', lw=.7, color='g', ms=6, alpha = 0.5)
+        plt.plot(lines_x,lines_y, marker='None', mfc='None', mec='b',linestyle='-',lw=.7, color='g', ms=6, alpha = 0.5)
 
     for i in range(len(all_lines)):
         lines_x = []
@@ -1237,15 +1002,14 @@ if options.display_map:
         lines_x.append(all_lines[i].end[0])
         lines_y.append(all_lines[i].end[1])
 
-        plt.plot(lines_x, lines_y, marker='None', mfc='None', mec='b',
-            linestyle='-', lw=.7, color='k', ms=6, alpha=0.2)
+        plt.plot(lines_x,lines_y, marker='None', mfc='None', mec='b',linestyle='-',lw=.7, color='k', ms=6, alpha=0.2)
         # plt.plot(0,0, marker = '^')
 
 
-"""___________________________________________________________________________
+"""_____________________________________________________________________________________________________________________
 
 
-______________________________________________________________________________
+________________________________________________________________________________________________________________________
 """
 
 if debug_level: print('Plotting the tracks...')
@@ -1254,81 +1018,66 @@ if debug_level: print('Plotting the tracks...')
 # fig, plotXY = plt.subplots(1,1, figsize=(inches, inches/1.7778))
 
 for track in range(len(tracks_X)):
-    # plot the lines between points
-    plt.plot(tracks_X[track][:], tracks_Y[track][:], marker='None',
-        mfc='None', mec='b', linestyle='-', lw=.7, color='y', ms=6)
 
-    #init of track
-    plt.plot(tracks_X[track][0:1], tracks_Y[track][0:1], marker='^', mfc='g',
-        mec='k', linestyle='-', lw=.7, color='r', ms=6)
+    plt.plot(tracks_X[track][:], tracks_Y[track][:], marker='None', mfc='None', mec='b',linestyle='-',
+             lw=.7, color='y', ms=6) # plot the lines between points
 
-    # plot track by track
-    plt.plot(tracks_X[track][1:-1], tracks_Y[track][1:-1], marker='^',
-        mfc='w', mec='b', linestyle='-', lw=.7, color='y', ms=6)
+    plt.plot(tracks_X[track][0:1], tracks_Y[track][0:1], marker='^', mfc='g', mec='k',linestyle='-',
+             lw=.7, color='r', ms=6) #init of track
 
-    # end of track
-    plt.plot(tracks_X[track][-1:], tracks_Y[track][-1:], marker='^', mfc='y',
-        mec='k', linestyle='-', lw=.7, color='r', ms=6)
+    plt.plot(tracks_X[track][1:-1], tracks_Y[track][1:-1], marker='^', mfc='w', mec='b',linestyle='-',
+             lw=.7, color='y', ms=6) # plot track by track
+
+    plt.plot(tracks_X[track][-1:], tracks_Y[track][-1:], marker='^', mfc='y', mec='k',linestyle='-',
+             lw=.7, color='r', ms=6) # end of track
+
 
 if eval_mode == 'mlat':
     for track in range(len(tracks_X)):
 
-        plt.plot(tracks_mlat_X[track][:], tracks_mlat_Y[track][:],
-            marker='None', mfc='None', mec='b', linestyle='-', lw=.7,
-            color='k', ms=6) # plot the lines between points
+        plt.plot(tracks_mlat_X[track][:], tracks_mlat_Y[track][:], marker='None', mfc='None', mec='b',linestyle='-',
+                 lw=.7, color='k', ms=6) # plot the lines between points
 
-        plt.plot(tracks_mlat_X[track][0:1], tracks_mlat_Y[track][0:1],
-            marker='+', mfc='g', mec='k', linestyle='-', lw=.7, color='r',
-            ms=6) #init of track
+        plt.plot(tracks_mlat_X[track][0:1], tracks_mlat_Y[track][0:1], marker='+', mfc='g', mec='k',linestyle='-',
+                 lw=.7, color='r', ms=6) #init of track
 
-        plt.plot(tracks_mlat_X[track][1:-1], tracks_mlat_Y[track][1:-1],
-            marker='+', mfc='w', mec='b', linestyle='-', lw=.7, color='k',
-            ms=6) # plot track by track
+        plt.plot(tracks_mlat_X[track][1:-1], tracks_mlat_Y[track][1:-1], marker='+', mfc='w', mec='b',linestyle='-',
+                 lw=.7, color='k', ms=6) # plot track by track
 
-        plt.plot(tracks_mlat_X[track][-1:], tracks_mlat_Y[track][-1:],
-            marker='+', mfc='y', mec='k', linestyle='-', lw=.7, color='r',
-            ms=6) # end of track
+        plt.plot(tracks_mlat_X[track][-1:], tracks_mlat_Y[track][-1:], marker='+', mfc='y', mec='k',linestyle='-',
+                 lw=.7, color='r', ms=6) # end of track
 
 
-plt.plot(0, 0, marker='^', mfc='None', mec='b', linestyle='-', lw=.7,
-    color='y', ms=6, label='Measured Plots')
-plt.plot(0, 0, marker='^', mfc='g', mec='k', linestyle='-', lw=.7, color='y',
-    ms=6, label='Start of track')
-plt.plot(0, 0, marker='^', mfc='y', mec='k', linestyle='-', lw=.7, color='y',
-    ms=6, label='End of track')
-plt.plot(0, 0, marker='^', mfc='r', mec='k', linestyle='-', lw=.7, color='y',
-    ms=6, label='Calculated missed plots')
+plt.plot(0, 0, marker='^', mfc='None', mec='b', linestyle='-', lw=.7, color='y', ms=6, label='Measured Plots')
+plt.plot(0, 0, marker='^', mfc='g', mec='k', linestyle='-', lw=.7, color='y', ms=6, label='Start of track')
+plt.plot(0, 0, marker='^', mfc='y', mec='k', linestyle='-', lw=.7, color='y', ms=6, label='End of track')
+plt.plot(0, 0, marker='^', mfc='r', mec='k', linestyle='-', lw=.7, color='y', ms=6, label='Calculated missed plots')
 plt.plot(0, 0, marker='^', mfc='w', mec='w', linestyle='None', ms=10)
-plt.plot(0, 0, marker='*', mfc='k', mec='k', lw=2.0, linestyle='None', ms=8,
-    label='SMR')
-if options.gps_eval:
-    plt.plot(0, 0, marker='+', mfc='None', mec='k', linestyle='-',lw=.7,
-        color='k', ms=6, label='GPS tracks')
+plt.plot(0, 0, marker='*', mfc='k', mec='k', lw=2.0, linestyle='None', ms=8, label='SMR')
+if options.gps_eval: plt.plot(0, 0, marker='+', mfc='None', mec='k',linestyle='-',lw=.7, color='k', ms=6, label='GPS tracks')
 
 
 if debug_level: print('Plotting the missed plots...')
 
-plt.plot(xm, ym, marker='^', mfc='r', mec='b', linestyle='None',
-    lw=0.7, color='r', ms=6)
+plt.plot(xm, ym, marker='^', mfc='r', mec='b', linestyle='None', lw=0.7, color='r', ms=6)
 
 
-"""___________________________________________________________________________
+"""_____________________________________________________________________________________________________________________
 
 plot gps data
 
 TODO: add option to switch on/off this piece of code...
 
-______________________________________________________________________________
+________________________________________________________________________________________________________________________
 """
 #plt gps tracks...
 
 if options.gps_eval:
     if debug_level:
         print('Plotting the gps tracks...')
-    plt.plot(gps_trkx, gps_trky, marker='+', mfc='None', mec='k',
-        linestyle='-', lw=.7, color='k', ms=6)
+    plt.plot(gps_trkx, gps_trky, marker='+', mfc='None', mec='k',linestyle='-',lw=.7, color='k', ms=6)
 
-"""___________________________________________________________________________
+"""_____________________________________________________________________________________________________________________
 """
 
 # if eval_mode == 'mlat':
@@ -1360,12 +1109,11 @@ textstr = 'Plots missed = %s' \
           '\nExpected plots = %s' \
           '\nMeassured plots = %s' \
           '\nP.D. = %.2f %%' \
-          '\nSUC mean delay = %.2f ms' % (missed_plots,expected_plots,
-                                          plots_readed, PD, suc_delay_mean)
+          '\nSUC mean delay = %.2f ms' % (missed_plots,expected_plots, plots_readed, PD, suc_delay_mean)
 
 
 
-legend = plt.legend(numpoints=1, prop={'size': 10}, fancybox=1)   # <---------
+legend = plt.legend(numpoints=1, prop={'size': 10}, fancybox=1)   # <-------------------------------------------------
 
 frame = legend.get_frame()
 frame.set_facecolor('k')
@@ -1374,27 +1122,22 @@ frame.set_alpha(0.3)
 
 props = dict(boxstyle='round', facecolor='k', alpha=0.3)
 
-plt.text(0.01, 0.02, textstr, ha='left', va='bottom', 
-    transform=plotXY.transAxes, fontsize=10, bbox=props)
+plt.text(0.01, 0.02, textstr, ha='left', va='bottom', transform=plotXY.transAxes, fontsize=10, bbox=props)
 
 # bb = legend.legendPatch.get_bbox().inverse_transformed(plotXY.transAxes)
 
 # print(bb.x0)
 
 # Add text relative to the location of the legend.
-# plt.text(1.025 + bb.x0, 0.97 + bb.y0 , textstr, ha='left', va='top', 
-    # transform=plotXY.transAxes, fontsize=10, bbox=props)
+# plt.text(1.025 + bb.x0, 0.97 + bb.y0 , textstr, ha='left', va='top', transform=plotXY.transAxes, fontsize=10, bbox=props)
 
 
 
 # left, width = .12, .5
 # bottom, height = .12, .5
-#plt.text(left, bottom, textstr, ha='left', va='top',
-    # transform=plotXY.transAxes, fontsize=10, bbox=props)
-#plt.text(textstr, xy=(0, 1), xytext=(12, -12), va='top',
-    # xycoords='axes fraction', textcoords='offset points', fontsize=10)
-#plt.text(left, bottom, textstr, ha='left', va='top',
-    # transform=plotXY.transAxes, fontsize=10, bbox=props)
+#plt.text(left, bottom, textstr, ha='left', va='top', transform=plotXY.transAxes, fontsize=10, bbox=props)
+#plt.text(textstr, xy=(0, 1), xytext=(12, -12), va='top', xycoords='axes fraction', textcoords='offset points', fontsize=10)
+#plt.text(left, bottom, textstr, ha='left', va='top', transform=plotXY.transAxes, fontsize=10, bbox=props)
 
 
 
@@ -1405,18 +1148,14 @@ plt.savefig(filename + '.pdf')
 
 # plt.savefig(filename + '.png')
 
-##############################################################################
+########################################################################################################################
 # If gps file: plot histogram of plots delay and SUC delays...
 if gps and options.delay_analy:
-    f, (ax1, ax2) = plt.subplots(2, sharex=True,
-                                 figsize=(inches, inches/1.7778))
-    ax1.hist(delta_t_plots, bins=100, color='r', histtype='stepfilled',
-             normed=1, stacked=1)
+    f, (ax1, ax2) = plt.subplots(2, sharex=True, figsize=(inches, inches/1.7778))
+    ax1.hist(delta_t_plots, bins=100, color='r', histtype='stepfilled', normed=1, stacked=1)
     ax1.set_title('Plots time delay histogram')
     ax2.set_title('SUC and Status message delay histogram')
-    ax2.hist(delta_t_SUC, bins=100, color='r', histtype='stepfilled',
-             normed=1, stacked=1)
-
+    ax2.hist(delta_t_SUC, bins=100, color='r', histtype='stepfilled', normed=1, stacked=1)
     # Fine-tune figure; make subplots close to each other and hide x ticks for
     # all but bottom plot.
     # f.subplots_adjust(hspace=0)
@@ -1429,8 +1168,7 @@ if gps and options.delay_analy:
     # plt.savefig(filename + '_SUC_delay.png')
 
 
-    # plot the delays vs time, just to display some delays problems in RPS 
-    # (2015/02/09)
+    #plot the delays vs time, just to display some delays problems in RPS (2015/02/09)
     d, dx = plt.subplots(1, figsize=(inches, inches/1.7778))
     dx.plot(delta_t_SUC)
     dx.plot(delta_t_plots)
@@ -1443,7 +1181,7 @@ if debug_level: print('Execution time: %s' % (time.time() - secs))
 
 
 
-##############################################################################
+########################################################################################################################
 # plt.tight_layout(1.5)
 
 if batch_mode:
@@ -1451,8 +1189,7 @@ if batch_mode:
 else:
     plt.show()
 
-if debug_level:
-    print('Program ended normally!')
+if debug_level: print('Program ended normally!')
 
 
 # [plt.plot(data[0],data[x]) for x in range(1,len(data[:,0]))]
