@@ -576,7 +576,7 @@ if __name__ == '__main__':
 
     options = options_parser()
 
-    print options
+    # print options
 
     f = open(options.filename, 'rb')
 
@@ -643,9 +643,9 @@ if __name__ == '__main__':
         Y = []
 
         # toggle comment to read the entire file or a few frames...____________
-        # for i in range(10000):
+        for i in range(1000):
         # toggle comment to read the entire file or a few frames...____________
-        while True:
+        # while True:
 
             # frame_ = {'cat': None}
             ast_frame.cat = numpy.fromfile(f, numpy.int8, 1)
@@ -761,7 +761,7 @@ if __name__ == '__main__':
         # reader = csv.reader(open(options.filename + '.csv', newline=''),
         #                     delimiter=",")
 
-        reader = csv.reader(options.filename + '.csv', delimiter=",")
+        reader = csv.reader(open(options.filename + '.csv'), delimiter=",")
         # reader = csv.reader(fstat_csv, delimiter=",")
 
         # <--------------------------------------0j0
@@ -927,7 +927,7 @@ if __name__ == '__main__':
                     print('dt: %s' % round(dt))
                 if (dt >= 1.1) and (dt <= 20) and \
                         (trks[j + i + 1] == trks[j + i]):
-                    if options.options.debug_level >= 5:
+                    if options.debug_level >= 5:
                         print('Missed found!, dt= %s <------------------' % dt)
                     x1, y1 = float(x[j + i]), float(y[j + i])
                     x2, y2 = float(x[j + i + 1]), float(y[j + i + 1])
