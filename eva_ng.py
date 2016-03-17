@@ -166,6 +166,14 @@ def options_parser():
                       default=False,
                       )
 
+    parser.add_option("-x", "--era_format",
+                      dest="era_format",
+                      help="Asterix recorded in era format...\n",
+                      metavar="era_format",
+                      action="store_true",
+                      default=False,
+                      )
+
     (options, args) = parser.parse_args()
     filename = options.filename
     debug_level = int(options.debug_level)
@@ -183,6 +191,8 @@ def options_parser():
         print('gps_filename:', options.gps_filename)
         print('display_map:', options.display_map)
         print('insert_stats:', options.insert_stats)
+        print('era_format:', options.era_format)
+
 
     return options  # filename, debug_level, do_all, batch_mode, eval_mode
 
@@ -264,209 +274,209 @@ def decode_cat10(frame):
     FSPEC, offset = read_fspec(frame)
     if options.debug_level >= 3:
         print('Frame %s FSPEC:   %s,' %
-              (frames_counter, binascii.hexlify(FSPEC)))
+              (ast_frame.counter, binascii.hexlify(FSPEC)))
     if len(FSPEC) >= 1:
         if FSPEC[0] & 128:
             if options.debug_level >= 3:
                 print('Frame %s Calling decode_SIC_SAC()...' %
-                      (frames_counter))
+                      (ast_frame.counter))
             SIC, SAC, offset = decode_IDEN(frame, offset)
             if options.debug_level >= 4:
-                print('Frame %s SIC: %s, SAC: %s' % (frames_counter, SIC, SAC))
+                print('Frame %s SIC: %s, SAC: %s' % (ast_frame.counter, SIC, SAC))
         if FSPEC[0] & 64:
             if options.debug_level >= 3:
-                print('Frame %s Calling decode_TYPE10()...' % (frames_counter))
+                print('Frame %s Calling decode_TYPE10()...' % (ast_frame.counter))
             TYPE10, offset = decode_TYPE10(frame, offset)
             if options.debug_level >= 4:
-                print('Frame %s TYPE10: %s' % (frames_counter, TYPE10))
+                print('Frame %s TYPE10: %s' % (ast_frame.counter, TYPE10))
         if FSPEC[0] & 32:
             if options.debug_level >= 3:
-                print('Frame %s Calling decode_TRD10()...' % (frames_counter))
+                print('Frame %s Calling decode_TRD10()...' % (ast_frame.counter))
 
             TRD10_TYP, TRD10_DCR, TRD10_CHN, TRD10_GBS, TRD10_CRT, offset = \
                 decode_TRD10(frame, offset)
 
             if options.debug_level >= 4:
                 print('Frame %s TRD10 TYPE: %s, TRD10 CHN: %s' %
-                      (frames_counter, TRD10_TYP, TRD10_CHN))
+                      (ast_frame.counter, TRD10_TYP, TRD10_CHN))
         if FSPEC[0] & 16:
             if options.debug_level >= 3:
                 print('Frame %s Calling decode_TIME()...' %
-                      (frames_counter))
+                      (ast_frame.counter))
             TIME, offset = decode_TIME(frame, offset)
             if options.debug_level >= 4:
-                print('Frame %s TIME: %s' % (frames_counter, TIME))
+                print('Frame %s TIME: %s' % (ast_frame.counter, TIME))
         if FSPEC[0] & 8:
             if options.debug_level >= 3:
                 print('Frame %s Calling decode_POS_WGS84()...' %
-                      (frames_counter))
+                      (ast_frame.counter))
             LAT, LON, offset = decode_POS_WGS84(frame, offset)
             if options.debug_level >= 4:
                 print('Frame %s LAT, LON: %s, %s' %
-                      (frames_counter, LAT, LON))
+                      (ast_frame.counter, LAT, LON))
         if FSPEC[0] & 4:
             if options.debug_level >= 3:
                 print('Frame %s Calling decode_POS_SPOL()...' %
-                      (frames_counter))
+                      (ast_frame.counter))
             RHO, THETA, offset = decode_POS_SPOL(frame, offset)
             if options.debug_level >= 4:
                 print('Frame %s Rho, Theta: %s, %s' %
-                      (frames_counter, RHO, THETA))
+                      (ast_frame.counter, RHO, THETA))
         if FSPEC[0] & 2:
             if options.debug_level >= 3:
                 print('Frame %s Calling decode_POS_CART()...' %
-                      (frames_counter))
+                      (ast_frame.counter))
             X, Y, offset = decode_POS_CART(frame, offset)
             if options.debug_level >= 4:
-                print('Frame %s X, Y: %s, %s' % (frames_counter, X, Y))
+                print('Frame %s X, Y: %s, %s' % (ast_frame.counter, X, Y))
 
     if len(FSPEC) >= 2:
         if FSPEC[1] & 128:
             if options.debug_level >= 3:
                 print('Frame %s Calling decode_CTV_POL()...' %
-                      (frames_counter))
+                      (ast_frame.counter))
             V_RHO, V_THETA, offset = decode_CTV_POL(frame, offset)
             if options.debug_level >= 4:
                 print('Frame %s V_RHO: %s, V_THETA: %s' %
-                      (frames_counter, V_RHO, V_THETA))
+                      (ast_frame.counter, V_RHO, V_THETA))
         if FSPEC[1] & 64:
             if options.debug_level >= 3:
                 print('Frame %s Calling decode_CTV_CART()...' %
-                      (frames_counter))
+                      (ast_frame.counter))
             VX, VY, offset = decode_CTV_CART(frame, offset)
             if options.debug_level >= 4:
                 print('Frame %s VX: %s, VY: %s' %
-                      (frames_counter, VX, VY))
+                      (ast_frame.counter, VX, VY))
         if FSPEC[1] & 32:
             if options.debug_level >= 3:
                 print('Frame %s Calling decode_TRACK()...' %
-                      (frames_counter))
+                      (ast_frame.counter))
             TRACK, offset = decode_TRACK(frame, offset)
             if options.debug_level >= 4:
                 print('Frame %s TRACK: %s' %
-                      (frames_counter, TRACK))
+                      (ast_frame.counter, TRACK))
         if FSPEC[1] & 16:
             if options.debug_level >= 3:
                 print('Frame %s Calling decode_TRACK_STATUS10()...' %
-                      (frames_counter))
+                      (ast_frame.counter))
             TRACK_STATUS10, offset = decode_TRACK_STATUS10(frame, offset)
             if options.debug_level >= 4:
                 print('Frame %s TRACK_STATUS10: %s' %
-                      (frames_counter, TRACK_STATUS10))
+                      (ast_frame.counter, TRACK_STATUS10))
         if FSPEC[1] & 8:
             if options.debug_level >= 3:
                 print('Frame %s Calling decode_ModeA()...' %
-                      (frames_counter))
+                      (ast_frame.counter))
             ModeA, offset = decode_ModeA(frame, offset)
             if options.debug_level >= 4:
                 print('Frame %s ModeA: %s, %s' %
-                      (frames_counter, hex(ModeA), oct(ModeA)))
+                      (ast_frame.counter, hex(ModeA), oct(ModeA)))
         if FSPEC[1] & 4:
             if options.debug_level >= 3:
                 print('Frame %s Calling decode_TADDR()...' %
-                      (frames_counter))
+                      (ast_frame.counter))
             TADDR, offset = decode_TADDR(frame, offset)
             if options.debug_level >= 4:
                 print('Frame %s TADDR: %s' %
-                      (frames_counter, TADDR))
+                      (ast_frame.counter, TADDR))
         if FSPEC[1] & 2:
             if options.debug_level >= 3:
                 print('Frame %s Calling decode_TID()...' %
-                      (frames_counter))
+                      (ast_frame.counter))
             TID_STI, TID_ID, offset = decode_TID(frame, offset)
             if options.debug_level >= 4: print('Frame %s TID_ID: %s, TID_ID: %s' %
-                                       (frames_counter, TID_STI, TID_ID))
+                                       (ast_frame.counter, TID_STI, TID_ID))
 
     if len(FSPEC) >= 3:
         if FSPEC[2] & 128:
             if options.debug_level >= 3: print('Frame %s Calling decode_ModeS()...' %
-                                       (frames_counter))
+                                       (ast_frame.counter))
             ModeS, offset = decode_ModeS(frame, offset)
             if options.debug_level >= 4: print('Frame %s ModeS: %s' %
-                                       (frames_counter, ModeS))
+                                       (ast_frame.counter, ModeS))
         if FSPEC[2] & 64:
             if options.debug_level >= 3: print('Frame %s Calling decode_VFI()...' %
-                                       (frames_counter))
+                                       (ast_frame.counter))
             VFI, offset = decode_VFI(frame, offset)
             if options.debug_level >= 4: print('Frame %s VFI: %s' %
-                                       (frames_counter, VFI))
+                                       (ast_frame.counter, VFI))
         if FSPEC[2] & 32:
             if options.debug_level >= 3: print('Frame %s Calling decode_FL()...' %
-                                       (frames_counter))
+                                       (ast_frame.counter))
             FL, offset = decode_FL(frame, offset)
             if options.debug_level >= 4: print('Frame %s FL: %s' %
-                (frames_counter, FL))
+                (ast_frame.counter, FL))
         if FSPEC[2] & 16:
             if options.debug_level >= 3:
                 print('Frame %s Calling decode_Meas_H()...' %
-                      (frames_counter))
+                      (ast_frame.counter))
             MeasHeight, offset = decode_Meas_H(frame, offset)
             if options.debug_level >= 4:
                 print('Frame %s Meassured Height: %s' %
-                      (frames_counter, MeasHeight))
+                      (ast_frame.counter, MeasHeight))
         if FSPEC[2] & 8:
             if options.debug_level >= 3:
                 print('Frame %s Calling decode_TSizeOri()...' %
-                      (frames_counter))
+                      (ast_frame.counter))
             TSize, TOri, TWidth, offset = decode_TSizeOri(frame, offset)
             if options.debug_level >= 4:
                 print('Frame %s Target Size: %s, Target Orientation: %s' %
-                      (frames_counter, TSize, TOri))
+                      (ast_frame.counter, TSize, TOri))
         if FSPEC[2] & 4:
             if options.debug_level >= 3:
                 print('Frame %s Calling decode_SysStat()...' %
-                      (frames_counter))
+                      (ast_frame.counter))
             NOGO, OVL, TSV, DIV, TTF, offset = decode_SysStat(frame, offset)
             if options.debug_level >= 4:
-                print('Frame %s System Status: %s' % (frames_counter, NOGO))
+                print('Frame %s System Status: %s' % (ast_frame.counter, NOGO))
         if FSPEC[2] & 2:
             if options.debug_level >= 3:
                 print('Frame %s Calling decode_PrePMess()...' %
-                      (frames_counter))
+                      (ast_frame.counter))
             PrePmess, offset = decode_PrePMess(frame, offset)
             if options.debug_level >= 4:
                 print('Frame %s Pre-programmed Message: %s' %
-                      (frames_counter, PrePmess))
+                      (ast_frame.counter, PrePmess))
 
 
             # TODO: write the following functions!!!!!!!!!!!!!!!!!!!
 
     # if len(FSPEC) >= 4:
     #     if FSPEC[3] & 128:
-    #         if debug_level >= 3: print('Frame %s Calling decode_sigmaP()...' % (frames_counter))
+    #         if debug_level >= 3: print('Frame %s Calling decode_sigmaP()...' % (ast_frame.counter))
     #         #sigmaX, sigmaY, covariXY, offset = decode_sigmaP(frame, offset)
-    #         if debug_level >= 4: print('Frame %s Sx: %s, Sy: %s, Cxy: %s' % (frames_counter, sigmaX, sigmaY, covariXY))
+    #         if debug_level >= 4: print('Frame %s Sx: %s, Sy: %s, Cxy: %s' % (ast_frame.counter, sigmaX, sigmaY, covariXY))
     #     if FSPEC[3] & 64:
-    #         if debug_level >= 3: print('Frame %s Calling decode_Presence()...' % (frames_counter))
+    #         if debug_level >= 3: print('Frame %s Calling decode_Presence()...' % (ast_frame.counter))
     #         #Presence, offset = decode_Presence(frame, offset)
-    #         if debug_level >= 4: print('Frame %s Presence: %s' % (frames_counter, Presence))
+    #         if debug_level >= 4: print('Frame %s Presence: %s' % (ast_frame.counter, Presence))
     #     if FSPEC[3] & 32:
-    #         if debug_level >= 3: print('Frame %s Calling decode_AmpPPlot()...' % (frames_counter))
+    #         if debug_level >= 3: print('Frame %s Calling decode_AmpPPlot()...' % (ast_frame.counter))
     #         #AmpPPlot, offset = decode_AmpPPlot(frame, offset)
-    #         if debug_level >= 4: print('Frame %s Amplitude of Primary Plot: %s' % (frames_counter, AmpPPlot))
+    #         if debug_level >= 4: print('Frame %s Amplitude of Primary Plot: %s' % (ast_frame.counter, AmpPPlot))
     #     if FSPEC[3] & 16:
-    #         if debug_level >= 3: print('Frame %s Calling decode_CAccel()...' % (frames_counter))
+    #         if debug_level >= 3: print('Frame %s Calling decode_CAccel()...' % (ast_frame.counter))
     #         #CAccelX, CAccelY, offset = decode_CAccel(frame, offset)
-    #         if debug_level >= 4: print('Frame %s CAccelX: %s, CAccelY: %s' % (frames_counter, CAccelX, CAccelY))
+    #         if debug_level >= 4: print('Frame %s CAccelX: %s, CAccelY: %s' % (ast_frame.counter, CAccelX, CAccelY))
     #     if FSPEC[3] & 8:
-    #         if debug_level >= 3: print('Frame %s Calling decode_SPARE()...' % (frames_counter))
+    #         if debug_level >= 3: print('Frame %s Calling decode_SPARE()...' % (ast_frame.counter))
     #     #     SPARE, offset = decode_SPARE(frame, offset)
-    #     #     if debug_level >= 4: print('Frame %s SPARE: %s' % (frames_counter, SPARE))
+    #     #     if debug_level >= 4: print('Frame %s SPARE: %s' % (ast_frame.counter, SPARE))
     #     if FSPEC[3] & 4:
-    #         if debug_level >= 3: print('Frame %s Calling decode_SField()...' % (frames_counter))
+    #         if debug_level >= 3: print('Frame %s Calling decode_SField()...' % (ast_frame.counter))
     #         #SField, offset = decode_SField(frame, offset)
-    #         if debug_level >= 4: print('Frame %s SField: %s' % (frames_counter, SField))
+    #         if debug_level >= 4: print('Frame %s SField: %s' % (ast_frame.counter, SField))
     #     if FSPEC[3] & 2:
-    #         if debug_level >= 3: print('Frame %s Calling decode_ResExpField()...' % (frames_counter))
+    #         if debug_level >= 3: print('Frame %s Calling decode_ResExpField()...' % (ast_frame.counter))
     #         #ResExpField, offset = decode_ResExpField(frame, offset)
-    #         if debug_level >= 4: print('Frame %s ResExpField: %s' % (frames_counter, ResExpField))
+    #         if debug_level >= 4: print('Frame %s ResExpField: %s' % (ast_frame.counter, ResExpField))
 
     # if it's a gps file: Decode the time of arriving to the recorder device:
     # print(len(frame))
     if options.gps:
         if options.debug_level >= 3:
             print('Frame %s Calling decode_TIME() at recording machine...' %
-                  (frames_counter))
+                  (ast_frame.counter))
         offset = len(frame) - 4
         # print(binascii.hexlify(frame[offset:offset+4]))
         time_at_rec, offset = decode_TIME(frame, offset)
@@ -570,7 +580,7 @@ if __name__ == '__main__':
     # start time for statistics purposes
     start_timestamp = time.time()
 
-    print("Asterix tool", __version__)
+    print "Asterix tool", __version__
 
     # filename, debug_level, do_all, batch_mode, eval_mode = options_parser()
 
@@ -636,18 +646,22 @@ if __name__ == '__main__':
 
         ast_frame = AstFrame()
         ast_frame.counter = 0
+
         if options.debug_level:
             print("Reading and decoding the Asterix frames...")
 
         X = []
         Y = []
 
-        # toggle comment to read the entire file or a few frames...____________
-        for i in range(1000):
-        # toggle comment to read the entire file or a few frames...____________
-        # while True:
+        # skip firts 8 bytes of the file
+        if options.era_format:
+            f.seek(f.tell() + 8, 0)
 
-            # frame_ = {'cat': None}
+        # toggle comment to read the entire file or a few frames...____________
+        # for i in range(1000):
+        # toggle comment to read the entire file or a few frames...____________
+        while True:
+
             ast_frame.cat = numpy.fromfile(f, numpy.int8, 1)
             if len(ast_frame.cat) == 0:
                 if options.debug_level < 2 and not options.batch_mode:
@@ -661,9 +675,19 @@ if __name__ == '__main__':
             ast_frame.length = numpy.fromfile(f, numpy.int16, 1)
             ast_frame.length.byteswap(True)
             f.seek(f.tell() - 3, 0)
-            ast_frame.content = numpy.fromfile(f, numpy.uint8,
-                                               ast_frame.length +
-                                               int(options.gps) * 10)
+            if options.gps:
+                ast_frame.content = numpy.fromfile(f, numpy.uint8,
+                                                   ast_frame.length + 10)
+            elif options.era_format:
+                ast_frame.content = numpy.fromfile(f, numpy.uint8,
+                                                   ast_frame.length + 8)
+
+            else:
+                ast_frame.content = numpy.fromfile(f, numpy.uint8,
+                                               ast_frame.length)
+
+
+            # raw_input()
 
             # print len(ast_frame.content)
             # raw_input()
@@ -674,17 +698,17 @@ if __name__ == '__main__':
 
             if options.debug_level >= 2:
                 print("Frame %s Content: %s" %
-                      (frames_counter, binascii.hexlify(frame)))
+                      (ast_frame.counter, binascii.hexlify(ast_frame.content)))
             if options.debug_level >= 2:
                 print("Frame %s Type:    %s, Asterix Cat.%s" %
-                      (frames_counter, hex(cat), cat))
+                      (ast_frame.counter, hex(ast_frame.cat), ast_frame.cat))
             if options.debug_level >= 2:
                 print("Frame %s Length:  %s, %s BYTEs" %
-                      (frames_counter, hex(frame_length), frame_length))
+                      (ast_frame.counter, hex(ast_frame.length), ast_frame.length))
 
             # call to other functions to decode the frame item's
             if options.debug_level >= 3:
-                print('Frame %s Calling decode function...' % frames_counter)
+                print('Frame %s Calling decode function...' % ast_frame.counter)
 
             # Decoding the frame:
             if ast_frame.cat == 10:
@@ -1115,8 +1139,15 @@ if __name__ == '__main__':
 
         for track in range(len(tracks_X)):
             for e in range(len(tracks_X[track])):
-                tracks_X[track][e] = float(tracks_X[track][e])  # + delta_x
-                tracks_Y[track][e] = float(tracks_Y[track][e])  # + delta_y
+                try:
+                    tracks_X[track][e] = float(tracks_X[track][e])  # + delta_x
+                except:
+                    tracks_X[track][e] = 0.0
+                try:
+                    tracks_Y[track][e] = float(tracks_Y[track][e])  # + delta_y
+                except:
+                    tracks_Y[track][e] = 0.0
+
                 temp1 = tracks_X[track][e] * math.cos(theta) - \
                     tracks_Y[track][e] * math.sin(theta)
                 temp2 = tracks_X[track][e] * math.sin(theta) + \
