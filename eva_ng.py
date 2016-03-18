@@ -1142,11 +1142,11 @@ if __name__ == '__main__':
                 try:
                     tracks_X[track][e] = float(tracks_X[track][e])  # + delta_x
                 except:
-                    tracks_X[track][e] = 0.0
+                    tracks_X[track][e] = tracks_X[track][e-1]
                 try:
                     tracks_Y[track][e] = float(tracks_Y[track][e])  # + delta_y
                 except:
-                    tracks_Y[track][e] = 0.0
+                    tracks_Y[track][e] = tracks_Y[track][e-1]
 
                 temp1 = tracks_X[track][e] * math.cos(theta) - \
                     tracks_Y[track][e] * math.sin(theta)
@@ -1273,7 +1273,8 @@ if __name__ == '__main__':
         # print(len(polylines))
 
         arcs = [entity for entity in dxf.entities if entity.dxftype == 'ARC']
-        # print((arcs[0].center))
+        #print((arcs[0].center))
+        print arcs
 
         for i in range(len(polylines)):
             lines_x = []
