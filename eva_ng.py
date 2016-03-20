@@ -75,6 +75,8 @@ from CoordConv import CoordTranslator
 import datetime
 import math
 
+import pynmea2
+
 # import pylab as P
 
 
@@ -170,6 +172,14 @@ def options_parser():
                       dest="era_format",
                       help="Asterix recorded in era format...\n",
                       metavar="era_format",
+                      action="store_true",
+                      default=False,
+                      )
+
+    parser.add_option("-a", "--nmea_track_file",
+                      dest="nmea",
+                      help="gps track in NMEA format...\n",
+                      metavar="nmea_format",
                       action="store_true",
                       default=False,
                       )
@@ -1090,14 +1100,33 @@ if __name__ == '__main__':
 
         gps_lat, gps_lon, timegps = [], [], []
         i = 0
-        print('Reading gps track points from file...')
-        for r in csv.reader(open(options.gps_filename), delimiter='\t'):
-            gps_lat = gps_lat + [float(r[1])]
-            gps_lon = gps_lon + [float(r[2])]
-            # timegps = timegps + [(datetime.datetime.strptime(
-            #    ' '+ r[5], " %H %M %S.%f "))]
-            timegps = timegps + [(datetime.datetime.strptime(' ' + r[5] +
-                                 ' ', " %H %M %S.%f "))]
+        if options.nmea:
+            print('Reading gps track points from NMEA file...')
+            with open(options.gps_filename, "r") as nmea_file:
+                for line in nmea_file:
+                    if line.startswith('$GNGGA'):
+                        msg = pynmea2.parse(line)
+                        # Change latitue and longitude to decimal degrees format
+                        degrees_lon = float(msg.lon[:3])
+                        fraction_lon = float(msg.lon[3:]) / 60
+                        degrees_lat = float(msg.lat[:2])
+                        fraction_lat = float(msg.lat[2:]) / 60
+                        DD_longitude = degrees_lon + fraction_lon  # longitude (decimal degrees)
+                        DD_latitude = degrees_lat + fraction_lat  # latitude (decimal degrees)
+
+                        gps_lat = gps_lat + [DD_latitude]
+                        gps_lon = gps_lon + [DD_longitude*(-1)]
+                # print gps_lat, gps_lon
+
+        else:
+            print('Reading gps track points from file...')
+            for r in csv.reader(open(options.gps_filename), delimiter='\t'):
+                gps_lat = gps_lat + [float(r[1])]
+                gps_lon = gps_lon + [float(r[2])]
+                # timegps = timegps + [(datetime.datetime.strptime(
+                #    ' '+ r[5], " %H %M %S.%f "))]
+                timegps = timegps + [(datetime.datetime.strptime(' ' + r[5] +
+                                     ' ', " %H %M %S.%f "))]
 
         print('Total gps points: ', len(lat))
         # print(lat[1], lon[1], timegps[1])
@@ -1108,7 +1137,7 @@ if __name__ == '__main__':
             gps_trkx = gps_trkx + [coord.LLtoUTM([gps_lat[e], gps_lon[e]])[2]]
             gps_trky = gps_trky + [coord.LLtoUTM([gps_lat[e], gps_lon[e]])[3]]
 
-        # print(gps_trkx[0:5], gps_trky[0:5])
+        print(gps_trkx[0:5], gps_trky[0:5])
 
         if options.debug_level:
             print('centering gps tracks to smr coords...')
@@ -1335,7 +1364,8 @@ if __name__ == '__main__':
         plt.plot(tracks_X[track][-1:], tracks_Y[track][-1:], marker='^', mfc='y',
             mec='k', linestyle='-', lw=.7, color='r', ms=6)
 
-    if options.eval_mode == 'mlat':
+    # if branch blocked with False
+    if options.eval_mode == 'mlat' and False:
         for track in range(len(tracks_X)):
 
             plt.plot(tracks_mlat_X[track][:], tracks_mlat_Y[track][:],
@@ -1389,7 +1419,7 @@ if __name__ == '__main__':
         if options.debug_level:
             print('Plotting the gps tracks...')
         plt.plot(gps_trkx, gps_trky, marker='+', mfc='None', mec='k',
-                linestyle='-', lw=.7, color='k', ms=6)
+                linestyle='-', lw=.7, color='k', alpha=0.2, ms=6)
 
     """___________________________________________________________________________
     """
