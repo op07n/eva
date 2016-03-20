@@ -1223,8 +1223,10 @@ if __name__ == '__main__':
                     temp1 = [float(tracks_lat[track][e]),
                              float(tracks_lon[track][e])]
                     temp2 = (coord.LLtoUTM(temp1))
-                    tracks_mlat_X[track][e] = int(temp2[2])
-                    tracks_mlat_Y[track][e] = int(temp2[3])
+                    # tracks_mlat_X[track][e] = int(temp2[2])
+                    # tracks_mlat_Y[track][e] = int(temp2[3])
+                    tracks_mlat_X[track][e] = temp2[2]
+                    tracks_mlat_Y[track][e] = temp2[3]
 
                     # tracks_mlat_X[track][e] -= mlat_xy[0]
                     # tracks_mlat_Y[track][e] -= mlat_xy[1]
@@ -1273,8 +1275,8 @@ if __name__ == '__main__':
         # print(len(polylines))
 
         arcs = [entity for entity in dxf.entities if entity.dxftype == 'ARC']
-        #print((arcs[0].center))
-        print arcs
+        # print((arcs[0].center))
+
 
         for i in range(len(polylines)):
             lines_x = []
