@@ -1333,6 +1333,21 @@ if __name__ == '__main__':
                 linestyle='-', lw=.7, color='k', ms=6, alpha=0.2)
             # plt.plot(0,0, marker = '^')
 
+    """___________________________________________________________________________
+
+    plot gps data
+
+    TODO: add option to switch on/off this piece of code...
+
+    ______________________________________________________________________________
+    """
+    # plt gps tracks...
+
+    if options.gps_eval:
+        if options.debug_level:
+            print('Plotting the gps tracks...')
+        plt.plot(gps_trkx, gps_trky, marker='v', mfc='None', mec='k',
+                 linestyle='-', lw=.7, color='r', alpha=0.5, ms=6)
 
     """___________________________________________________________________________
 
@@ -1404,22 +1419,6 @@ if __name__ == '__main__':
 
     plt.plot(xm, ym, marker='^', mfc='r', mec='b', linestyle='None',
              lw=0.7, color='r', ms=6)
-
-    """___________________________________________________________________________
-
-    plot gps data
-
-    TODO: add option to switch on/off this piece of code...
-
-    ______________________________________________________________________________
-    """
-    # plt gps tracks...
-
-    if options.gps_eval:
-        if options.debug_level:
-            print('Plotting the gps tracks...')
-        plt.plot(gps_trkx, gps_trky, marker='+', mfc='None', mec='k',
-                linestyle='-', lw=.7, color='k', alpha=0.2, ms=6)
 
     """___________________________________________________________________________
     """
