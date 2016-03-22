@@ -897,29 +897,35 @@ if __name__ == '__main__':
     if options.debug_level:
         print('Generating lists of tracks...')
 
+    tracks_t = []
     tracks_X = []
     tracks_Y = []
     tracks_lat, tracks_lon = [], []  # *
-    x_, y_ = [], []
+    t_, x_, y_ = [], [], []
     lat_, lon_ = [], []  # *
     j = 0
 
     for key in reversed(sorted(count)):
         for i in range(count[key]):
+            t_.append(float(t[j+i]))
             x_.append(x[j+i])
             y_.append(y[j+i])
             lat_.append(lat[j+i])  # *
             lon_.append(lon[j+i])  # *
+        tracks_t.append(t_)
         tracks_X.append(x_)
         tracks_Y.append(y_)
         tracks_lat.append(lat_)  # *
         tracks_lon.append(lon_)  # *
+        t_ = []
         x_ = []
         y_ = []
         lat_ = []  # *
         lon_ = []  # *
-
+        # print tracks_t[j] #, tracks_X[j+i], tracks_Y[j+i]
+        # raw_input()
         j += i + 1
+
 
     # print(tracks_lat)
     # print(tracks_lon)
@@ -1098,7 +1104,7 @@ if __name__ == '__main__':
         # delta_y = mlat_xy[1] - smr_xy[1]
         # print(delta_x, delta_y)
 
-        gps_lat, gps_lon, timegps = [], [], []
+        gps_lat, gps_lon, gps_time = [], [], []
         i = 0
         if options.nmea:
             print('Reading gps track points from NMEA file...')
@@ -1106,17 +1112,17 @@ if __name__ == '__main__':
                 for line in nmea_file:
                     if line.startswith('$GNGGA'):
                         msg = pynmea2.parse(line)
-                        # Change latitue and longitude to decimal degrees format
-                        degrees_lon = float(msg.lon[:3])
-                        fraction_lon = float(msg.lon[3:]) / 60
-                        degrees_lat = float(msg.lat[:2])
-                        fraction_lat = float(msg.lat[2:]) / 60
-                        DD_longitude = degrees_lon + fraction_lon  # longitude (decimal degrees)
-                        DD_latitude = degrees_lat + fraction_lat  # latitude (decimal degrees)
 
-                        gps_lat = gps_lat + [DD_latitude]
-                        gps_lon = gps_lon + [DD_longitude*(-1)]
-                # print gps_lat, gps_lon
+                        gps_lat.append(msg.latitude)
+                        gps_lon.append(msg.longitude)
+                        gps_time.append(msg.timestamp.microsecond/1000000 +
+                                        msg.timestamp.second +
+                                        msg.timestamp.minute * 60.0 +
+                                        msg.timestamp.hour * 3600.0)
+                        # print (msg.timestamp.microsecond/1000000.0 +
+                        #                 msg.timestamp.second +
+                        #                 msg.timestamp.minute * 60.0 +
+                        #                 msg.timestamp.hour * 3600.0)
 
         else:
             print('Reading gps track points from file...')
@@ -1128,7 +1134,7 @@ if __name__ == '__main__':
                 timegps = timegps + [(datetime.datetime.strptime(' ' + r[5] +
                                      ' ', " %H %M %S.%f "))]
 
-        print('Total gps points: ', len(lat))
+        print 'Total gps points: ', len(lat)
         # print(lat[1], lon[1], timegps[1])
         # print((timegps[22]- timegps[21])*2.5)
 
@@ -1144,6 +1150,18 @@ if __name__ == '__main__':
         for e in range(len(gps_trkx)):
             gps_trkx[e] -= smr_xy[0]
             gps_trky[e] -= smr_xy[1]
+
+        # for t in range(len(tracks_t)):
+        #     for ti in range(len(tracks_t[t])):
+        #         for j in range(len(gps_time)):
+        #             if tracks_t[t][ti] == gps_time[j]:
+        #                 print gps_time[j]
+        #                 print tracks_t[t][ti]
+        #                 print tracks_X[t][ti], tracks_Y[t][ti]
+        #                 print gps_trkx[j], gps_trky[j]
+        #                 raw_input()
+        #                 break
+
 
         # if eval_mode == 'mlat':
         #     if debug_level: print('evaluating mlat,\

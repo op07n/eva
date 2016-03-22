@@ -18,7 +18,7 @@ Asterix decoding code.
 TODO :
 1.- end cat10 decoder code
 2.- write cat21 decoder for SMMS
-3.- write cat 1 decode (for conventional SSR/PSR)? by now stand by... 
+3.- write cat 1 decode (for conventional SSR/PSR)? by now stand by...
 relax and end the first part
 ______________________________________________________________________________
 """
@@ -59,7 +59,7 @@ def decode_cat21(frame):
     *********************** Pending to develop/write *************************
 
     :param frame:
-    :return: csv file with decoded frames and csv with decoded frames sorted 
+    :return: csv file with decoded frames and csv with decoded frames sorted
     by track number
 
 
@@ -172,7 +172,7 @@ def decode_TIME(frame, offset):
     TIMEOD = TIMEOD << 8
     TIMEOD = TIMEOD + (numpy.array([frame[offset]], dtype=numpy.uint32))
     offset += 1
-    TIMEOD = (TIMEOD / 128)
+    TIMEOD = (TIMEOD / 128.0)
     return float(TIMEOD), offset
 
 
@@ -303,9 +303,9 @@ def decode_ModeA(frame, offset):
     # ModeA3 = ModeA << 3
     # ModeA = ModeA << 3
     # ModeA4 = ModeA << 3
-    
+
     # print(oct(ModeA1),oct(ModeA2), oct(ModeA3), oct(ModeA4))
-    
+
     return int(ModeA), offset
 
 
@@ -423,4 +423,3 @@ def decode_PrePMess(frame, offset):
     PrePmess = 0
     offset += 1
     return PrePmess, offset
-
