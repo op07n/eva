@@ -1131,8 +1131,8 @@ if __name__ == '__main__':
                 gps_lon = gps_lon + [float(r[2])]
                 # timegps = timegps + [(datetime.datetime.strptime(
                 #    ' '+ r[5], " %H %M %S.%f "))]
-                timegps = timegps + [(datetime.datetime.strptime(' ' + r[5] +
-                                     ' ', " %H %M %S.%f "))]
+                gps_time = gps_time + [(datetime.datetime.strptime(' ' + r[5] +
+                                        ' ', " %H %M %S.%f "))]
 
         print 'Total gps points: ', len(lat)
         # print(lat[1], lon[1], timegps[1])
@@ -1255,6 +1255,22 @@ if __name__ == '__main__':
                 else:
                     print(tracks_X[track][e])   # <-------------------DEBUGGING
 
+# matching gps waypoints with asterix plots. Prototype!!!!
+        tracks_X_real, tracks_Y_real = [], []
+        for t in range(len(tracks_t)):
+            for ti in range(len(tracks_t[t])):
+                for j in range(len(gps_time)):
+                    if tracks_t[t][ti] == gps_time[j]:
+                        # print gps_time[j]
+                        # print tracks_t[t][ti]
+                        # print "plots_XY: ", tracks_X[t][ti], tracks_Y[t][ti]
+                        # print "gps_XY: ", gps_trkx[j], gps_trky[j]
+                        tracks_X_real.append(gps_trkx[j])
+                        tracks_Y_real.append(gps_trky[j])
+                        # raw_input()
+                        break
+
+
         if options.debug_level:
             print('converting mlat geodetic lat/lon to UTM and centering to smr\
                   coords...')
@@ -1364,8 +1380,22 @@ if __name__ == '__main__':
     if options.gps_eval:
         if options.debug_level:
             print('Plotting the gps tracks...')
-        plt.plot(gps_trkx, gps_trky, marker='v', mfc='None', mec='k',
-                 linestyle='-', lw=.7, color='r', alpha=0.5, ms=6)
+        plt.plot(gps_trkx, gps_trky, marker='None', mfc='None', mec='k',
+                 linestyle='-', lw=.7, color='k', alpha=0.5, ms=6)
+
+        # experimental. TODO: enhance indexing system
+        plt.plot(tracks_X_real, tracks_Y_real, marker='x', mfc='k', mec='k',
+                 linestyle='None', lw=4, color='k', alpha=0.9, ms=6, mew=1)
+        index = 0
+        for track in range(len(tracks_X)):
+            for j in range(len(tracks_X[track])):
+                plt.plot([tracks_X[track][j], tracks_X_real[index]],
+                         [tracks_Y[track][j], tracks_Y_real[index]],
+                         marker='None', mfc='k', mec='k', linestyle='-',
+                         lw=1, color='r', alpha=0.9, ms=6)
+                index += 1
+
+
 
     """___________________________________________________________________________
 
@@ -1387,15 +1417,15 @@ if __name__ == '__main__':
 
         # init of track
         plt.plot(tracks_X[track][0:1], tracks_Y[track][0:1], marker='^', mfc='g',
-            mec='k', linestyle='-', lw=.7, color='r', ms=6)
+            mec='k', linestyle='-', lw=.7, color='r', ms=6, mew=1)
 
         # plot track by track
         plt.plot(tracks_X[track][1:-1], tracks_Y[track][1:-1], marker='^',
-            mfc='w', mec='b', linestyle='-', lw=.7, color='y', ms=6)
+            mfc='w', mec='b', linestyle='-', lw=.7, color='y', ms=6, mew=1)
 
         # end of track
         plt.plot(tracks_X[track][-1:], tracks_Y[track][-1:], marker='^', mfc='y',
-            mec='k', linestyle='-', lw=.7, color='r', ms=6)
+            mec='k', linestyle='-', lw=.7, color='r', ms=6, mew=1)
 
     # if branch blocked with False
     if options.eval_mode == 'mlat' and False:
@@ -1407,36 +1437,36 @@ if __name__ == '__main__':
 
             plt.plot(tracks_mlat_X[track][0:1], tracks_mlat_Y[track][0:1],
                 marker='+', mfc='g', mec='k', linestyle='-', lw=.7, color='r',
-                ms=6) #init of track
+                ms=6, mew=1) #init of track
 
             plt.plot(tracks_mlat_X[track][1:-1], tracks_mlat_Y[track][1:-1],
                 marker='+', mfc='w', mec='b', linestyle='-', lw=.7, color='k',
-                ms=6) # plot track by track
+                ms=6, mew=1) # plot track by track
 
             plt.plot(tracks_mlat_X[track][-1:], tracks_mlat_Y[track][-1:],
                      marker='+', mfc='y', mec='k', linestyle='-',
-                     lw=.7, color='r', ms=6)  # end of track
+                     lw=.7, color='r', ms=6, mew=1)  # end of track
 
     plt.plot(0, 0, marker='^', mfc='None', mec='b', linestyle='-', lw=.7,
-             color='y', ms=6, label='Measured Plots')
+             color='y', ms=6, label='Measured Plots', mew=1)
     plt.plot(0, 0, marker='^', mfc='g', mec='k', linestyle='-', lw=.7,
-             color='y', ms=6, label='Start of track')
+             color='y', ms=6, label='Start of track', mew=1)
     plt.plot(0, 0, marker='^', mfc='y', mec='k', linestyle='-', lw=.7,
-             color='y', ms=6, label='End of track')
+             color='y', ms=6, label='End of track', mew=1)
     plt.plot(0, 0, marker='^', mfc='r', mec='k', linestyle='-', lw=.7,
-             color='y', ms=6, label='Calculated missed plots')
-    plt.plot(0, 0, marker='^', mfc='w', mec='w', linestyle='None', ms=10)
+             color='y', ms=6, label='Calculated missed plots', mew=1)
+    plt.plot(0, 0, marker='^', mfc='w', mec='w', linestyle='None', ms=10, mew=1)
     plt.plot(0, 0, marker='*', mfc='k', mec='k', lw=2.0, linestyle='None',
-             ms=8, label='SMR')
+             ms=8, label='SMR', mew=1)
     if options.gps_eval:
         plt.plot(0, 0, marker='+', mfc='None', mec='k', linestyle='-', lw=.7,
-                 color='k', ms=6, label='GPS tracks')
+                 color='k', ms=6, label='GPS tracks', mew=1)
 
     if options.debug_level:
         print('Plotting the missed plots...')
 
     plt.plot(xm, ym, marker='^', mfc='r', mec='b', linestyle='None',
-             lw=0.7, color='r', ms=6)
+             lw=0.7, color='r', ms=6, mew=1)
 
     """___________________________________________________________________________
     """
