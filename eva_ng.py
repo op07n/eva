@@ -62,6 +62,7 @@ import sys
 import binascii
 import numpy as numpy
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 import operator
 import time
 import csv
@@ -1257,6 +1258,7 @@ if __name__ == '__main__':
 
 # matching gps waypoints with asterix plots. Prototype!!!!
         tracks_X_real, tracks_Y_real = [], []
+        X_error, Y_error, D_error = [], [], []
         for t in range(len(tracks_t)):
             for ti in range(len(tracks_t[t])):
                 for j in range(len(gps_time)):
@@ -1267,7 +1269,10 @@ if __name__ == '__main__':
                         # print "gps_XY: ", gps_trkx[j], gps_trky[j]
                         tracks_X_real.append(gps_trkx[j])
                         tracks_Y_real.append(gps_trky[j])
-                        # raw_input()
+                        X_error.append(tracks_X[t][ti] - gps_trkx[j])
+                        Y_error.append(tracks_Y[t][ti] - gps_trky[j])
+                        D_error = math.hypot(tracks_X[t][ti] - gps_trkx[j],
+                                             tracks_Y[t][ti] - gps_trky[j])
                         break
 
 
@@ -1352,7 +1357,7 @@ if __name__ == '__main__':
                 # print(lines_x)
 
             plt.plot(lines_x, lines_y, marker='None', mfc='None', mec='b',
-                linestyle='-', lw=.7, color='g', ms=6, alpha = 0.5)
+                linestyle='-', lw=.7, color='g', ms=6, alpha=0.5)
 
         for i in range(len(all_lines)):
             lines_x = []
@@ -1376,6 +1381,29 @@ if __name__ == '__main__':
     ______________________________________________________________________________
     """
     # plt gps tracks...
+    # Experimental pcker
+    def onpick(event):
+        if isinstance(event.artist, Line2D):
+            print "1"
+
+        N = len(event.ind)
+        if not N:
+            return True
+
+        figi = plt.figure()
+        for subplotnum, dataind in enumerate(event.ind):
+            ax = figi.add_subplot(N, 1, subplotnum+1)
+            ax.plot(X_error, Y_error, marker='o', mfc='r', mec='k', linestyle='None',
+                    lw=.7, color='r', alpha=0.9, ms=3)
+            circ1 = plt.Circle((0, 0), radius=10, color='g', fill=False)
+            circ2 = plt.Circle((0, 0), radius=5, color='g', fill=False)
+            ax.add_patch(circ1)
+            ax.add_patch(circ2)
+            # ax.plot(X[dataind])
+        plt.grid(True)
+        plotXY.set_aspect('equal', None, None)
+        figi.show()
+        return True
 
     if options.gps_eval:
         if options.debug_level:
@@ -1387,12 +1415,13 @@ if __name__ == '__main__':
         plt.plot(tracks_X_real, tracks_Y_real, marker='x', mfc='k', mec='k',
                  linestyle='None', lw=4, color='k', alpha=0.9, ms=6, mew=1)
         index = 0
+        # draw a line between real position and plot position:
         for track in range(len(tracks_X)):
             for j in range(len(tracks_X[track])):
                 plt.plot([tracks_X[track][j], tracks_X_real[index]],
                          [tracks_Y[track][j], tracks_Y_real[index]],
-                         marker='None', mfc='k', mec='k', linestyle='-',
-                         lw=1, color='r', alpha=0.9, ms=6)
+                         marker='None', mfc='k', mec='k', linestyle='dotted',
+                         lw=.7, color='r', alpha=0.9, ms=6, picker=10)
                 index += 1
 
 
@@ -1539,6 +1568,7 @@ if __name__ == '__main__':
     if options.gps and options.delay_analy:
         f, (ax1, ax2) = plt.subplots(2, sharex=True,
                                      figsize=(inches, inches/1.7778))
+        # ax1.hist(delta_t_plots, bins=100, color='r', histtype='stepfilled',
         ax1.hist(delta_t_plots, bins=100, color='r', histtype='stepfilled',
                  normed=1, stacked=1)
         ax1.set_title('Plots time delay histogram')
@@ -1575,6 +1605,7 @@ if __name__ == '__main__':
     if options.batch_mode:
         print('Batch mode ON, so not plotting graphics...')
     else:
+        fig.canvas.mpl_connect('pick_event', onpick)
         plt.show()
 
     if options.debug_level:
