@@ -78,6 +78,9 @@ import math
 
 import pynmea2
 
+from matplotlib.patches import Ellipse
+
+
 # import pylab as P
 
 
@@ -586,6 +589,72 @@ def is_gps(filename):
 #
 ##############################################################################
 
+def plot_point_cov(points, nstd=2, ax=None, **kwargs):
+    """
+    Plots an `nstd` sigma ellipse based on the mean and covariance of a point
+    "cloud" (points, an Nx2 array).
+
+    Parameters
+    ----------
+        points : An Nx2 array of the data points.
+        nstd : The radius of the ellipse in numbers of standard deviations.
+            Defaults to 2 standard deviations.
+        ax : The axis that the ellipse will be plotted on. Defaults to the
+            current axis.
+        Additional keyword arguments are pass on to the ellipse patch.
+
+    Returns
+    -------
+        A matplotlib ellipse artist
+    """
+    pos = points.mean(axis=0)
+    cov = numpy.cov(points, rowvar=False)
+    return plot_cov_ellipse(cov, pos, nstd, ax, **kwargs)
+
+def plot_cov_ellipse(cov, pos, nstd=2, ax=None, **kwargs):
+    """
+    Plots an `nstd` sigma error ellipse based on the specified covariance
+    matrix (`cov`). Additional keyword arguments are passed on to the
+    ellipse patch artist.
+
+    Parameters
+    ----------
+        cov : The 2x2 covariance matrix to base the ellipse on
+        pos : The location of the center of the ellipse. Expects a 2-element
+            sequence of [x0, y0].
+        nstd : The radius of the ellipse in numbers of standard deviations.
+            Defaults to 2 standard deviations.
+        ax : The axis that the ellipse will be plotted on. Defaults to the
+            current axis.
+        Additional keyword arguments are pass on to the ellipse patch.
+
+    Returns
+    -------
+        A matplotlib ellipse artist
+    """
+    def eigsorted(cov):
+        vals, vecs = numpy.linalg.eigh(cov)
+        order = vals.argsort()[::-1]
+        return vals[order], vecs[:,order]
+
+    if ax is None:
+        ax = plt.gca()
+
+    vals, vecs = eigsorted(cov)
+    theta = numpy.degrees(numpy.arctan2(*vecs[:,0][::-1]))
+
+    # Width and height are "full" widths, not radius
+    width, height = 2 * nstd * numpy.sqrt(vals)
+    ellip = Ellipse(xy=pos, width=width, height=height, angle=theta, **kwargs)
+
+    ax.add_artist(ellip)
+    return ellip
+
+
+
+
+
+
 if __name__ == '__main__':
 
     # start time for statistics purposes
@@ -1013,14 +1082,20 @@ if __name__ == '__main__':
 
     # CHN_inAnalysis = 1
     # print(CHN)
-    CHN_inAnalysis = (sum(CHN)/len(CHN))
+    try:
+        CHN_inAnalysis = (sum(CHN)/len(CHN))
+    except:
+        pass
     # print(CHN_inAnalysis)
     # print(round(CHN_inAnalysis))
 
     if options.gps:
-        suc_delay_mean = sum(delta_t_SUC)/len(delta_t_SUC)
-        suc_delay_mean = float("%.2f" % suc_delay_mean)
-        suc_delay_max = float(max(delta_t_SUC))
+        try:
+            suc_delay_mean = sum(delta_t_SUC)/len(delta_t_SUC)
+            suc_delay_mean = float("%.2f" % suc_delay_mean)
+            suc_delay_max = float(max(delta_t_SUC))
+        except:
+            pass
     else:
         suc_delay_mean = 0
         suc_delay_mean = 0
@@ -1033,9 +1108,12 @@ if __name__ == '__main__':
                options.filename[-10:-8] + ':00')
     # print(date)
 
-    statistics = [date, PD, plots_readed, expected_plots, missed_plots,
+    try:
+        statistics = [date, PD, plots_readed, expected_plots, missed_plots,
                   plots_outof_bounds, suc_delay_mean, suc_delay_max,
                   CHN_inAnalysis, notes]
+    except:
+        pass
 
     print(' _______________________________________________________________')
     print('| Analysis results:')
@@ -1043,9 +1121,15 @@ if __name__ == '__main__':
     print('| Total plots: %s  ' % plots_readed)
     print('| Expected plots: %s' % expected_plots)
     print('| P.D. = %.2f %%' % PD)
-    print('| RPS number = %.2f ' % CHN_inAnalysis)
-    print('| SUC mean delay: %.2f ms' % suc_delay_mean)
-    print('| SUC max delay: %.2f ms' % suc_delay_max)
+    try:
+        print('| RPS number = %.2f ' % CHN_inAnalysis)
+    except:
+        pass
+    try:
+        print('| SUC mean delay: %.2f ms' % suc_delay_mean)
+        print('| SUC max delay: %.2f ms' % suc_delay_max)
+    except:
+        pass
     print('|_______________________________________________________________')
 
     if options.debug_level and options.insert_stats:
@@ -1257,23 +1341,24 @@ if __name__ == '__main__':
                     print(tracks_X[track][e])   # <-------------------DEBUGGING
 
 # matching gps waypoints with asterix plots. Prototype!!!!
-        tracks_X_real, tracks_Y_real = [], []
-        X_error, Y_error, D_error = [], [], []
-        for t in range(len(tracks_t)):
-            for ti in range(len(tracks_t[t])):
-                for j in range(len(gps_time)):
-                    if tracks_t[t][ti] == gps_time[j]:
-                        # print gps_time[j]
-                        # print tracks_t[t][ti]
-                        # print "plots_XY: ", tracks_X[t][ti], tracks_Y[t][ti]
-                        # print "gps_XY: ", gps_trkx[j], gps_trky[j]
-                        tracks_X_real.append(gps_trkx[j])
-                        tracks_Y_real.append(gps_trky[j])
-                        X_error.append(tracks_X[t][ti] - gps_trkx[j])
-                        Y_error.append(tracks_Y[t][ti] - gps_trky[j])
-                        D_error = math.hypot(tracks_X[t][ti] - gps_trkx[j],
-                                             tracks_Y[t][ti] - gps_trky[j])
-                        break
+        if options.gps_eval:
+            tracks_X_real, tracks_Y_real = [], []
+            X_error, Y_error, D_error = [], [], []
+            for t in range(len(tracks_t)):
+                for ti in range(len(tracks_t[t])):
+                    for j in range(len(gps_time)):
+                        if tracks_t[t][ti] == gps_time[j]:
+                            # print gps_time[j]
+                            # print tracks_t[t][ti]
+                            # print "plots_XY: ", tracks_X[t][ti], tracks_Y[t][ti]
+                            # print "gps_XY: ", gps_trkx[j], gps_trky[j]
+                            tracks_X_real.append(gps_trkx[j])
+                            tracks_Y_real.append(gps_trky[j])
+                            X_error.append(tracks_X[t][ti] - gps_trkx[j])
+                            Y_error.append(tracks_Y[t][ti] - gps_trky[j])
+                            D_error = math.hypot(tracks_X[t][ti] - gps_trkx[j],
+                                                 tracks_Y[t][ti] - gps_trky[j])
+                            break
 
 
         if options.debug_level:
@@ -1345,7 +1430,6 @@ if __name__ == '__main__':
         arcs = [entity for entity in dxf.entities if entity.dxftype == 'ARC']
         # print((arcs[0].center))
 
-
         for i in range(len(polylines)):
             lines_x = []
             lines_y = []
@@ -1381,29 +1465,47 @@ if __name__ == '__main__':
     ______________________________________________________________________________
     """
     # plt gps tracks...
-    # Experimental pcker
+    # Experimental picker
     def onpick(event):
-        if isinstance(event.artist, Line2D):
-            print "1"
+        # if isinstance(event.artist, Line2D):
+        #     print "1"
 
-        N = len(event.ind)
-        if not N:
-            return True
+        # N = len(event.ind)
+        # if not N:
+        #     return True
 
         figi = plt.figure()
-        for subplotnum, dataind in enumerate(event.ind):
-            ax = figi.add_subplot(N, 1, subplotnum+1)
-            ax.plot(X_error, Y_error, marker='o', mfc='r', mec='k', linestyle='None',
-                    lw=.7, color='r', alpha=0.9, ms=3)
-            circ1 = plt.Circle((0, 0), radius=10, color='g', fill=False)
-            circ2 = plt.Circle((0, 0), radius=5, color='g', fill=False)
-            ax.add_patch(circ1)
-            ax.add_patch(circ2)
-            # ax.plot(X[dataind])
+        # for subplotnum, dataind in enumerate(event.ind):
+        ax = figi.add_subplot(1, 1, 1)
+
+
+        ax.plot(X_error, Y_error, marker='o', mfc='r', mec='k', linestyle='None',
+                lw=.7, color='r', alpha=0.9, ms=3)
+        circ1 = plt.Circle((0, 0), radius=10, color='g', fill=False)
+        circ2 = plt.Circle((0, 0), radius=5, color='g', fill=False)
+        ax.add_patch(circ1)
+        ax.add_patch(circ2)
+
+        # error_points = []
+        # for i in range(len(X_error)):
+        #     error_points.append(math.sqrt(X_error[i]**2 + Y_error[i]**2))
+        #
+        # ax.hist(error_points, bins=300, color='r',
+        #         histtype='stepfilled', normed=1)
+
         plt.grid(True)
         plotXY.set_aspect('equal', None, None)
+
+        # points = numpy.array([X_error, Y_error])
+        # plot_point_cov(points, nstd=3, alpha=0.5, color='green')
+
         figi.show()
         return True
+
+
+
+
+
 
     if options.gps_eval:
         if options.debug_level:
@@ -1423,8 +1525,6 @@ if __name__ == '__main__':
                          marker='None', mfc='k', mec='k', linestyle='dotted',
                          lw=.7, color='r', alpha=0.9, ms=6, picker=10)
                 index += 1
-
-
 
     """___________________________________________________________________________
 
