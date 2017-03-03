@@ -58,26 +58,24 @@ __author__ = 'avidalh'
 __version__ = 'alpha_0.500'
 
 
-import sys
 import binascii
-import numpy as numpy
-import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
-import operator
-import time
 import csv
-from decoder import *
-import dxfgrabber
+import datetime
+import math
+import operator
 import os
+import sys
+import time
 from collections import Counter
 from optparse import OptionParser
 
-from CoordConv import CoordTranslator
-import datetime
-import math
-
+import dxfgrabber
+import matplotlib.pyplot as plt
+import numpy as numpy
 import pynmea2
-
+from CoordConv import CoordTranslator
+from decoder import *
+from matplotlib.lines import Line2D
 from matplotlib.patches import Ellipse
 
 
@@ -657,8 +655,9 @@ def plot_cov_ellipse(cov, pos, nstd=2, ax=None, **kwargs):
 
 if __name__ == '__main__':
 
-    # start time for statistics purposes
+    # timestamp for statistics purposes
     start_timestamp = time.time()
+    #start_timestamp_utc = datetime.utcnow()
 
     print "Asterix tool", __version__
 
@@ -1453,7 +1452,7 @@ if __name__ == '__main__':
             lines_y.append(all_lines[i].end[1])
 
             plt.plot(lines_x, lines_y, marker='None', mfc='None', mec='b',
-                linestyle='-', lw=.7, color='k', ms=6, alpha=0.2)
+                     linestyle='-', lw=.7, color='k', ms=6, alpha=0.2)
             # plt.plot(0,0, marker = '^')
 
     """___________________________________________________________________________
@@ -1478,9 +1477,8 @@ if __name__ == '__main__':
         # for subplotnum, dataind in enumerate(event.ind):
         ax = figi.add_subplot(1, 1, 1)
 
-
-        ax.plot(X_error, Y_error, marker='o', mfc='r', mec='k', linestyle='None',
-                lw=.7, color='r', alpha=0.9, ms=3)
+        ax.plot(X_error, Y_error, marker='o', mfc='r', mec='k',
+                linestyle='None', lw=.7, color='r', alpha=0.9, ms=3)
         circ1 = plt.Circle((0, 0), radius=10, color='g', fill=False)
         circ2 = plt.Circle((0, 0), radius=5, color='g', fill=False)
         ax.add_patch(circ1)
