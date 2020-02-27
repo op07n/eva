@@ -3,7 +3,7 @@ import json
 import matplotlib.pyplot as plt
 import datetime
 import csv
-from CoordConv import CoordTranslator.UTMtoLL as UTMtoLL
+from CoordConv import CoordTranslator
 
 def readFile(fileName):
     '''
@@ -33,23 +33,29 @@ def readFile(fileName):
                 try:
                     plotLWO = e['CAT010']['I270']
                 except:
-                    plotLWO = ''
+                    plotLWO = {'Length': None, 'Width': None, 'Ori': None}
                 try:
                     plotXY = e['CAT010']['I042']
                 except:
-                    plotXY = ''
-                if plotLWO and plotXY:
-                    track = {'track': trackNb,
+                    plotXY = {'X': None, 'Y': None}
+                try:
+                    plotLL = e['CAT010']['I041']
+                except:
+                    plotLL = {'Lat': None, 'Lon': None}
+
+                # if plotLWO and plotXY:
+                track = {'track': trackNb,
                             'data': {'ToD': [e['CAT010']['I140']['ToD']],
-                                     'X': [e['CAT010']['I042']['X']],
-                                     'Y': [e['CAT010']['I042']['Y']],
-                                     'Lat': [e['CAT010']['I041']['Lat']],
-                                     'Lon': [e['CAT010']['I041']['Lon']],
-                                     'Width': [e['CAT010']['I270']['Width']],
-                                     'Length': [e['CAT010']['I270']['Length']],
-                                     'Ori': [e['CAT010']['I270']['Ori']]
+                                     'X': [plotXY['X']],
+                                     'Y': [plotXY['Y']],
+                                     'Lat': [plotLL['Lat']],
+                                     'Lon': [plotLL['Lon']],
+                                     'Width': [plotLWO['Width']],
+                                     'Length': [plotLWO['Length']],
+                                     'Ori': [plotLWO['Ori']]
                                     }
                             }
+                '''
                 elif plotXY and not plotLWO:
                     track = {'track': trackNb,
                             'data': {'ToD': [e['CAT010']['I140']['ToD']],
@@ -74,26 +80,33 @@ def readFile(fileName):
                                      'Ori': [0]
                                     }
                             }
+                '''
                 index += 1
                 trackList.append(track)
             else:
                 try:
                     plotLWO = e['CAT010']['I270']
                 except:
-                    plotLWO = ''
+                    plotLWO = {'Length': None, 'Width': None, 'Ori': None}
                 try:
                     plotXY = e['CAT010']['I042']
                 except:
-                    plotXY = ''
+                    plotXY = {'X': None, 'Y': None}
+                try:
+                    plotLL = e['CAT010']['I041']
+                except:
+                    plotLL = {'Lat': None, 'Lon': None}
+
                 if plotLWO and plotXY:
                     trackList[trackIndices[trackNb]]['data']['ToD'].append(e['CAT010']['I140']['ToD'])
-                    trackList[trackIndices[trackNb]]['data']['X'].append(e['CAT010']['I042']['X'])
-                    trackList[trackIndices[trackNb]]['data']['Y'].append(e['CAT010']['I042']['Y'])
-                    trackList[trackIndices[trackNb]]['data']['Lat'].append(e['CAT010']['I041']['Lat'])
-                    trackList[trackIndices[trackNb]]['data']['Lon'].append(e['CAT010']['I041']['Lon'])
-                    trackList[trackIndices[trackNb]]['data']['Width'].append(e['CAT010']['I270']['Width'])
-                    trackList[trackIndices[trackNb]]['data']['Length'].append(e['CAT010']['I270']['Length'])
-                    trackList[trackIndices[trackNb]]['data']['Ori'].append(e['CAT010']['I270']['Ori'])
+                    trackList[trackIndices[trackNb]]['data']['X'].append(plotXY['X'])
+                    trackList[trackIndices[trackNb]]['data']['Y'].append(plotXY['Y'])
+                    trackList[trackIndices[trackNb]]['data']['Lat'].append(plotLL['Lat'])
+                    trackList[trackIndices[trackNb]]['data']['Lon'].append(plotLL['Lon'])
+                    trackList[trackIndices[trackNb]]['data']['Width'].append(plotLWO['Width'])
+                    trackList[trackIndices[trackNb]]['data']['Length'].append(plotLWO['Length'])
+                    trackList[trackIndices[trackNb]]['data']['Ori'].append(plotLWO['Ori'])
+                '''
                 elif plotXY:
                     trackList[trackIndices[trackNb]]['data']['ToD'].append(e['CAT010']['I140']['ToD'])
                     trackList[trackIndices[trackNb]]['data']['X'].append(e['CAT010']['I042']['X'])
@@ -112,10 +125,11 @@ def readFile(fileName):
                     trackList[trackIndices[trackNb]]['data']['Width'].append(0)
                     trackList[trackIndices[trackNb]]['data']['Length'].append(0)
                     trackList[trackIndices[trackNb]]['data']['Ori'].append(0)
+                '''
     return trackList, trackIndices                    
 
 
-def calcStats(trackList, trackIndices, trackListBig):
+def calcStats(trackList, trackIndices, trackListBig, maxSize):
     '''
     '''
     totalMissed = 0
@@ -356,90 +370,95 @@ def readDGPSfile(fileName):
     return [{'track': 0, 'data': {'Lat': Lat, 'Lon': Lon, 'Tod': ToD}}]
 
 
+def main():
+
+    asterixDecodedFile =  '/home/avidalh/Desktop/GNSS/DriveTests/SMR/20200129/200129-gcxo-230611.gps.json'
+    asterixDecodedFile =  '/home/avidalh/Desktop/GNSS/DriveTests/SMMS/20200129/200129-gcxo-230614.gps_mike6.json'
+    asterixDecodedFile =  'recordings/080001.gps.json'
+    
+    DGPStrackFile = '/home/avidalh/Desktop/GNSS/ASCII/20200129/20200129.cst'
+    DGPStrackFile = 'recordings/20140220.txt'
 
 
-asterixDecodedFile =  '/home/avidalh/Desktop/GNSS/DriveTests/SMR/20200129/200129-gcxo-230611.gps.json'
-asterixDecodedFile =  '/home/avidalh/Desktop/GNSS/DriveTests/SMMS/20200129/200129-gcxo-230614.gps_mike6.json'
+    trackList, trackIndices = readFile(asterixDecodedFile)
+    trackDGPS = readDGPSfile(DGPStrackFile)
 
-DGPStrackFile = '/home/avidalh/Desktop/GNSS/ASCII/20200129/20200129.cst'
+    #plotSizeHist(trackList)
 
-trackList, trackIndices = readFile(asterixDecodedFile)
-trackDGPS = readDGPSfile(DGPStrackFile)
+    inches = 16
+    fig, plotXY = plt.subplots(1, 1, figsize=(inches, inches/1.7778), frameon=True)
 
-#plotSizeHist(trackList)
+    cid = fig.canvas.mpl_connect('button_press_event', onclick)
 
-inches = 16
-fig, plotXY = plt.subplots(1, 1, figsize=(inches, inches/1.7778), frameon=True)
+    j = 0
+    plotList = []
 
-cid = fig.canvas.mpl_connect('button_press_event', onclick)
+    maxSize = 70
 
-j = 0
-plotList = []
+    trackListBig = getBiggest(trackList, trackIndices, maxSize)
+    totalTracks, totalPlots, totalMissed, totalBig, trackListMiss= calcStats(trackList, trackIndices, trackListBig, maxSize)
+    textStr = '\n'.join((
+        r'$Tracks: %2d$' % (totalTracks),
+        r'$Plots: %2d$' % (totalPlots),
+        r'$Missed: %2d$' % (totalMissed),
+        r'$Big: %2d$' % (totalBig),
+        r'$PD: %.2f$' % ((totalPlots-totalMissed)/totalPlots*100)
+    ))
 
-maxSize = 70
-
-trackListBig = getBiggest(trackList, trackIndices, maxSize)
-totalTracks, totalPlots, totalMissed, totalBig, trackListMiss= calcStats(trackList, trackIndices, trackListBig)
-textStr = '\n'.join((
-    r'$Tracks: %2d$' % (totalTracks),
-    r'$Plots: %2d$' % (totalPlots),
-    r'$Missed: %2d$' % (totalMissed),
-    r'$Big: %2d$' % (totalBig),
-    r'$PD: %.2f$' % ((totalPlots-totalMissed)/totalPlots*100)
-))
-
-plotTrackListLatLon(trackList)
-plotTrackDGPS(trackDGPS)
-'''
-for track in trackListMiss:
-    for j in range(len(track['data']['X'])):
-        plt.plot(track['data']['X'][j],
-                     track['data']['Y'][j],
-                     marker='v',
-                     mfc='k',
-                     ms=10,
-                     mec='k',
-                     linestyle='-',
-                     lw=.7, color='y',
-                     mew=.5,
-                     alpha=0.75)
-
-for track in trackListBig:
-    for j in range(len(track['data']['X'])):
-        if track['data']['Length'][j] >= maxSize or track['data']['Width'][j] >= maxSize:
+    plotTrackListLatLon(trackList)
+    plotTrackDGPS(trackDGPS)
+    '''
+    for track in trackListMiss:
+        for j in range(len(track['data']['X'])):
             plt.plot(track['data']['X'][j],
-                     track['data']['Y'][j],
-                     marker='o',
-                     mfc='None',
-                     ms=track['data']['Length'][j]*.5,
-                     mec='cyan',
-                     linestyle='-',
-                     lw=.7, color='y',
-                     mew=.5,
-                     alpha=0.75)
-            plt.plot(track['data']['X'][j],
-                     track['data']['Y'][j],
-                     marker='o',
-                     mfc='None',
-                     ms=track['data']['Width'][j]*.5,
-                     mec='magenta',
-                     linestyle='-',
-                     lw=.7, color='y',
-                     mew=.5,
-                     alpha=.75)
-'''
+                        track['data']['Y'][j],
+                        marker='v',
+                        mfc='k',
+                        ms=10,
+                        mec='k',
+                        linestyle='-',
+                        lw=.7, color='y',
+                        mew=.5,
+                        alpha=0.75)
+
+    for track in trackListBig:
+        for j in range(len(track['data']['X'])):
+            if track['data']['Length'][j] >= maxSize or track['data']['Width'][j] >= maxSize:
+                plt.plot(track['data']['X'][j],
+                        track['data']['Y'][j],
+                        marker='o',
+                        mfc='None',
+                        ms=track['data']['Length'][j]*.5,
+                        mec='cyan',
+                        linestyle='-',
+                        lw=.7, color='y',
+                        mew=.5,
+                        alpha=0.75)
+                plt.plot(track['data']['X'][j],
+                        track['data']['Y'][j],
+                        marker='o',
+                        mfc='None',
+                        ms=track['data']['Width'][j]*.5,
+                        mec='magenta',
+                        linestyle='-',
+                        lw=.7, color='y',
+                        mew=.5,
+                        alpha=.75)
+    '''
 
 
-plt.title('Drive Test Analysis script, file {0}'.format(asterixDecodedFile))
-plt.text(0.85, 0.95, textStr, transform=plotXY.transAxes, fontsize=10, verticalalignment='top')
-plt.axis('equal')
-plt.grid(linestyle=':', linewidth=1)
-plt.grid(True)
-plt.tight_layout()
-# plt.ylim([-250, 1350])
-# plt.xlim([-2700, 1000])
-plt.autoscale(enable=False)
+    plt.title('Drive Test Analysis script, file {0}'.format(asterixDecodedFile))
+    plt.text(0.85, 0.95, textStr, transform=plotXY.transAxes, fontsize=10, verticalalignment='top')
+    plt.axis('equal')
+    plt.grid(linestyle=':', linewidth=1)
+    plt.grid(True)
+    plt.tight_layout()
+    # plt.ylim([-250, 1350])
+    # plt.xlim([-2700, 1000])
+    plt.autoscale(enable=False)
 
-plt.show()
+    plt.show()
 
 
+if __name__ == '__main__':
+    main()
