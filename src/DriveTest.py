@@ -3,7 +3,7 @@ import json
 import matplotlib.pyplot as plt
 import datetime
 import csv
-
+from CoordConv import CoordTranslator.UTMtoLL as UTMtoLL
 
 def readFile(fileName):
     '''
