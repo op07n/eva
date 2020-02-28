@@ -377,9 +377,10 @@ def main():
     asterixDecodedFile =  '/home/avidalh/Desktop/GNSS/DriveTests/SMR/20200129/200129-gcxo-230611.gps.json'
     asterixDecodedFile =  '/home/avidalh/Desktop/GNSS/DriveTests/SMMS/20200129/200129-gcxo-230614.gps_mike6.json'
     asterixDecodedFile =  '/home/avidalh/Desktop/GNSS/DriveTests/SMR/20200130/200130-gcxo-223713.gps.json'
+    asterixDecodedFile =  'recordings/200130-gcxo-223713.gps.json'
     # asterixDecodedFile =  'recordings/080001.gps.json'
     
-    DGPStrackFile = '/home/avidalh/Desktop/GNSS/ASCII/20200130/20200130.cst'
+    DGPStrackFile = 'recordings/20200130.cst'
     # DGPStrackFile = 'recordings/20140220.txt'
 
 
