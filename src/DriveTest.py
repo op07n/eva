@@ -180,9 +180,11 @@ def getBiggest(trackList, trackIndices, maxSize=60):
     bigPlots = []
     print()
     for e in trackList:
-        if max(e['data']['Width']) >= maxSize  or max(e['data']['Length']) >= maxSize:
-            bigPlots.append(e)
-
+        try:
+            if max(e['data']['Width']) >= maxSize  or max(e['data']['Length']) >= maxSize:
+                bigPlots.append(e)
+        except:
+            continue
     return bigPlots
 
 
@@ -292,6 +294,7 @@ def plotTrackListLatLon(trackList):
         except:
             continue
 
+
 def plotTrackDGPS(trackList):
     # plot every track
     for i in range(len(trackList)):
@@ -341,7 +344,6 @@ def plotTrackDGPS(trackList):
             continue
 
 
-
 def plotSizeHist(trackList):
     width, length = [], []
     for track in trackList:
@@ -374,10 +376,11 @@ def main():
 
     asterixDecodedFile =  '/home/avidalh/Desktop/GNSS/DriveTests/SMR/20200129/200129-gcxo-230611.gps.json'
     asterixDecodedFile =  '/home/avidalh/Desktop/GNSS/DriveTests/SMMS/20200129/200129-gcxo-230614.gps_mike6.json'
-    asterixDecodedFile =  'recordings/080001.gps.json'
+    asterixDecodedFile =  '/home/avidalh/Desktop/GNSS/DriveTests/SMR/20200130/200130-gcxo-223713.gps.json'
+    # asterixDecodedFile =  'recordings/080001.gps.json'
     
-    DGPStrackFile = '/home/avidalh/Desktop/GNSS/ASCII/20200129/20200129.cst'
-    DGPStrackFile = 'recordings/20140220.txt'
+    DGPStrackFile = '/home/avidalh/Desktop/GNSS/ASCII/20200130/20200130.cst'
+    # DGPStrackFile = 'recordings/20140220.txt'
 
 
     trackList, trackIndices = readFile(asterixDecodedFile)
