@@ -367,10 +367,29 @@ def readDGPSfile(fileName):
         for line in csv_reader:
             Lat.append(float(line[1]))
             Lon.append(float(line[2]))
-            ToD.append(datetime.datetime.strptime(' ' + line[5] + ' ', " %H %M %S.%f "))
+            ToD.append(int(line[5][:2])*60*60 + int(line[5][3:5])*60 + float(line[5][6:11]))
+            # ToD.append(datetime.datetime.strptime(' ' + line[5] + ' ', " %H %M %S.%f "))
     
-    return [{'track': 0, 'data': {'Lat': Lat, 'Lon': Lon, 'Tod': ToD}}]
+    return [{'track': 0, 'data': {'Lat': Lat, 'Lon': Lon, 'ToD': ToD}}]
 
+
+def objectCorrelator(trackList, trackDGPS):
+    '''
+    correlates plots and DGPS points.
+
+    '''
+    maxTimeOffset = 0.5
+    maxSeparation = 15
+    for track in trackList:
+        for points in trackDGPS:
+            for timeStampt in points['data']['ToD']:
+                if abs(track['data']['ToD'][0] - timeStampt) < maxTimeOffset:
+                    indexPoint = points['data']['ToD'].index(timeStampt)
+                    sizeArray = len(track['data']['ToD'])
+                    track['data']['ToDDGPS'] = points['data']['ToD'][indexPoint:12]
+                    track['data']['LatDGPS'] = points['data']['Lat'][indexPoint:12]
+                    track['data']['LonDGPS'] = points['data']['Lon'][indexPoint:12]
+                    break
 
 def main():
 
@@ -386,6 +405,8 @@ def main():
 
     trackList, trackIndices = readFile(asterixDecodedFile)
     trackDGPS = readDGPSfile(DGPStrackFile)
+
+    objectCorrelator(trackList, trackDGPS)
 
     #plotSizeHist(trackList)
 
@@ -411,6 +432,8 @@ def main():
 
     plotTrackListLatLon(trackList)
     plotTrackDGPS(trackDGPS)
+
+
     '''
     for track in trackListMiss:
         for j in range(len(track['data']['X'])):
