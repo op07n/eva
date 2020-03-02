@@ -361,6 +361,7 @@ def readDGPSfile(fileName):
     Lon = []
     ToD = []
     # track = {}
+    CoordTrans = CoordTranslator()
     with open(fileName, "r") as DGPSfile:
         csv_reader = csv.reader(DGPSfile, delimiter='\t')
         next(csv_reader)
@@ -368,7 +369,7 @@ def readDGPSfile(fileName):
             Lat.append(float(line[1]))
             Lon.append(float(line[2]))
             ToD.append(int(line[5][:2])*60*60 + int(line[5][3:5])*60 + float(line[5][6:11]))
-            # ToD.append(datetime.datetime.strptime(' ' + line[5] + ' ', " %H %M %S.%f "))
+            
     
     return [{'track': 0, 'data': {'Lat': Lat, 'Lon': Lon, 'ToD': ToD}}]
 
@@ -380,16 +381,19 @@ def objectCorrelator(trackList, trackDGPS):
     '''
     maxTimeOffset = 0.5
     maxSeparation = 15
+    trackListOutput = []
     for track in trackList:
         for points in trackDGPS:
             for timeStampt in points['data']['ToD']:
                 if abs(track['data']['ToD'][0] - timeStampt) < maxTimeOffset:
                     indexPoint = points['data']['ToD'].index(timeStampt)
                     sizeArray = len(track['data']['ToD'])
-                    track['data']['ToDDGPS'] = points['data']['ToD'][indexPoint:12]
-                    track['data']['LatDGPS'] = points['data']['Lat'][indexPoint:12]
-                    track['data']['LonDGPS'] = points['data']['Lon'][indexPoint:12]
+                    track['data']['ToDDGPS'] = points['data']['ToD'][indexPoint:indexPoint+sizeArray]
+                    track['data']['LatDGPS'] = points['data']['Lat'][indexPoint:indexPoint+sizeArray]
+                    track['data']['LonDGPS'] = points['data']['Lon'][indexPoint:indexPoint+sizeArray]
+                    trackListOutput.append(track)
                     break
+    return trackListOutput
 
 def main():
 
@@ -406,7 +410,7 @@ def main():
     trackList, trackIndices = readFile(asterixDecodedFile)
     trackDGPS = readDGPSfile(DGPStrackFile)
 
-    objectCorrelator(trackList, trackDGPS)
+    trackList = objectCorrelator(trackList, trackDGPS)
 
     #plotSizeHist(trackList)
 
