@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import datetime
 import csv
 from CoordConv import CoordTranslator
+import math
 
 def readFile(fileName):
     '''
@@ -13,14 +14,11 @@ def readFile(fileName):
     with open(fileName, 'r') as f:
         data = [json.loads(line[:-2]) for line in f.readlines()[0:-1]]
     
-    # f = open(fileName)
-    # data = json.load(f)
-
     trackList = []
     track = {}
     trackIndices = {}
     index = 0
-
+    
     for e in data[:]:
         try:
             trackNb = e['CAT010']['I161']['TrkNb']
@@ -40,8 +38,14 @@ def readFile(fileName):
                     plotXY = {'X': None, 'Y': None}
                 try:
                     plotLL = e['CAT010']['I041']
+                    XY_UTM = latLon2local([plotLL['Lat'], plotLL['Lon']])
+                    X_UTM = XY_UTM[0]
+                    Y_UTM = XY_UTM[1]
                 except:
                     plotLL = {'Lat': None, 'Lon': None}
+                    X_UTM = None
+                    Y_UTM = None
+
 
                 # if plotLWO and plotXY:
                 track = {'track': trackNb,
@@ -52,35 +56,12 @@ def readFile(fileName):
                                      'Lon': [plotLL['Lon']],
                                      'Width': [plotLWO['Width']],
                                      'Length': [plotLWO['Length']],
-                                     'Ori': [plotLWO['Ori']]
+                                     'Ori': [plotLWO['Ori']],
+                                     'X_UTM': [X_UTM],
+                                     'Y_UTM': [Y_UTM]
                                     }
                             }
-                '''
-                elif plotXY and not plotLWO:
-                    track = {'track': trackNb,
-                            'data': {'ToD': [e['CAT010']['I140']['ToD']],
-                                     'X': [e['CAT010']['I042']['X']],
-                                     'Y': [e['CAT010']['I042']['Y']],
-                                     'Lat': [e['CAT010']['I041']['Lat']],
-                                     'Lon': [e['CAT010']['I041']['Lon']],
-                                     'Width': [0],
-                                     'Length': [0],
-                                     'Ori': [0]
-                                    }
-                            }
-                else:
-                    track = {'track': trackNb,
-                            'data': {'ToD': [e['CAT010']['I140']['ToD']],
-                                     'X': [None],
-                                     'Y': [None],
-                                     'Lat': [None],
-                                     'Lon': [None],
-                                     'Width': [0],
-                                     'Length': [0],
-                                     'Ori': [0]
-                                    }
-                            }
-                '''
+                
                 index += 1
                 trackList.append(track)
             else:
@@ -94,8 +75,13 @@ def readFile(fileName):
                     plotXY = {'X': None, 'Y': None}
                 try:
                     plotLL = e['CAT010']['I041']
+                    XY_UTM = latLon2local([plotLL['Lat'], plotLL['Lon']])
+                    X_UTM = XY_UTM[0]
+                    Y_UTM = XY_UTM[1]
                 except:
                     plotLL = {'Lat': None, 'Lon': None}
+                    X_UTM = None
+                    Y_UTM = None
 
                 if plotLWO and plotXY:
                     trackList[trackIndices[trackNb]]['data']['ToD'].append(e['CAT010']['I140']['ToD'])
@@ -106,27 +92,30 @@ def readFile(fileName):
                     trackList[trackIndices[trackNb]]['data']['Width'].append(plotLWO['Width'])
                     trackList[trackIndices[trackNb]]['data']['Length'].append(plotLWO['Length'])
                     trackList[trackIndices[trackNb]]['data']['Ori'].append(plotLWO['Ori'])
-                '''
-                elif plotXY:
-                    trackList[trackIndices[trackNb]]['data']['ToD'].append(e['CAT010']['I140']['ToD'])
-                    trackList[trackIndices[trackNb]]['data']['X'].append(e['CAT010']['I042']['X'])
-                    trackList[trackIndices[trackNb]]['data']['Y'].append(e['CAT010']['I042']['Y'])
-                    trackList[trackIndices[trackNb]]['data']['Lat'].append(e['CAT010']['I041']['Lat'])
-                    trackList[trackIndices[trackNb]]['data']['Lon'].append(e['CAT010']['I041']['Lon'])
-                    trackList[trackIndices[trackNb]]['data']['Width'].append(0)
-                    trackList[trackIndices[trackNb]]['data']['Length'].append(0)
-                    trackList[trackIndices[trackNb]]['data']['Ori'].append(0)
-                else:
-                    trackList[trackIndices[trackNb]]['data']['ToD'].append(e['CAT010']['I140']['ToD'])
-                    trackList[trackIndices[trackNb]]['data']['X'].append(None)
-                    trackList[trackIndices[trackNb]]['data']['Y'].append(None)
-                    trackList[trackIndices[trackNb]]['data']['Lat'].append(None)
-                    trackList[trackIndices[trackNb]]['data']['Lon'].append(None)
-                    trackList[trackIndices[trackNb]]['data']['Width'].append(0)
-                    trackList[trackIndices[trackNb]]['data']['Length'].append(0)
-                    trackList[trackIndices[trackNb]]['data']['Ori'].append(0)
-                '''
+                    trackList[trackIndices[trackNb]]['data']['X_UTM'].append(X_UTM)
+                    trackList[trackIndices[trackNb]]['data']['Y_UTM'].append(Y_UTM)
+                    
     return trackList, trackIndices                    
+
+
+def latLon2local(coords, smr=True):
+    # smr_latlon = [28.477493, -16.332522]
+    # mlat_latlon = [28.482653, -16.341537]
+    # Kx = 0.9999
+    # Ky = 0.9998
+    # theta = -0.6488 * 2 * math.pi / 360
+    coordTrans = CoordTranslator()
+    # smr_xy = coordTrans.LLtoUTM(smr_latlon)[2:]
+    # temp1 = smr_xy[0] * math.cos(theta) - smr_xy[1] * math.sin(theta)
+    # temp2 = smr_xy[0] * math.sin(theta) + smr_xy[1] * math.cos(theta)
+    # smr_xy = [temp1 * Kx, temp2 * Ky]
+
+    pointXY = coordTrans.LLtoUTM(coords)[2:]
+    # temp1 = pointXY[0] * math.cos(theta) - pointXY[1] * math.sin(theta)
+    # temp2 = pointXY[0] * math.sin(theta) + pointXY[1] * math.cos(theta)
+
+    # print([temp1 * Kx - smr_xy[0], temp2 * Ky - smr_xy[1]])
+    return pointXY    
 
 
 def calcStats(trackList, trackIndices, trackListBig, maxSize):
@@ -246,6 +235,55 @@ def plotTrackList(trackList):
             continue
 
 
+def plotTrackListXY_calc(trackList):
+    # plot every track
+    for i in range(len(trackList)):
+        plt.plot(trackList[i]['data']['X_UTM'],
+                 trackList[i]['data']['Y_UTM'],
+                 marker='^',
+                 mfc='None',
+                 ms=3,
+                 mec='b',
+                 linestyle='-',
+                 lw=.7,
+                 color='y',
+                 mew=.5,
+                 pickradius=5,
+                 picker=None)
+    # plot the start point of every track in green
+    for t in trackList:
+        try:
+            plt.plot(t['data']['X_UTM'][0],
+                     t['data']['Y_UTM'][0],
+                        marker='^',
+                        mfc='g',
+                        ms=3,
+                        mec='g',
+                        linestyle='-',
+                        lw=.7,
+                        color='y',
+                        mew=.5,
+                        picker=5)
+        except:
+            continue
+    # plot the ending point of every track in red
+    for t in trackList:
+        try:
+            plt.plot(t['data']['X_UTM'][-2],
+                     t['data']['Y_UTM'][-2],
+                        marker='^',
+                        mfc='r',
+                        ms=3,
+                        mec='r',
+                        linestyle='-',
+                        lw=.7,
+                        color='y',
+                        mew=.5,
+                        picker=5)
+        except:
+            continue
+
+
 def plotTrackListLatLon(trackList):
     # plot every track
     for i in range(len(trackList)):
@@ -295,11 +333,17 @@ def plotTrackListLatLon(trackList):
             continue
 
 
-def plotTrackDGPS(trackList):
+def plotTrackDGPS(trackList, UTM=True):
     # plot every track
+    if UTM:
+        xkey = 'X_UTM'
+        ykey = 'Y_UTM'
+    else:
+        xkey = 'Lon'
+        ykey = 'Lat'
     for i in range(len(trackList)):
-        plt.plot(trackList[i]['data']['Lon'],
-                 trackList[i]['data']['Lat'],
+        plt.plot(trackList[i]['data'][xkey],
+                 trackList[i]['data'][ykey],
                  marker='x',
                  mfc='None',
                  ms=3,
@@ -313,8 +357,8 @@ def plotTrackDGPS(trackList):
     # plot the start point of every track in green
     for t in trackList:
         try:
-            plt.plot(t['data']['Lon'][0],
-                     t['data']['Lat'][0],
+            plt.plot(t['data'][xkey][0],
+                     t['data'][ykey][0],
                         marker='x',
                         mfc='grey',
                         ms=3,
@@ -329,8 +373,8 @@ def plotTrackDGPS(trackList):
     # plot the ending point of every track in red
     for t in trackList:
         try:
-            plt.plot(t['data']['Lon'][-2],
-                     t['data']['Lat'][-2],
+            plt.plot(t['data'][xkey][-2],
+                     t['data'][ykey][-2],
                         marker='^',
                         mfc='r',
                         ms=3,
@@ -357,11 +401,23 @@ def plotSizeHist(trackList):
 
 
 def readDGPSfile(fileName):
+    '''
+    doc string here
+    '''
+    # smr_latlon = [28.477493, -16.332522]
+    # mlat_latlon = [28.482653, -16.341537] 
+    # Kx = 0.9999
+    # Ky = 0.9998
+    # theta = -0.6488 * 2 * math.pi / 360
     Lat = []
     Lon = []
+    X_UTM = []
+    Y_UTM = []
     ToD = []
     # track = {}
-    CoordTrans = CoordTranslator()
+    # coordTrans = CoordTranslator()
+    # smr_xy = coordTrans.LLtoUTM(smr_latlon)[2:]
+    # print(smr_xy)
     with open(fileName, "r") as DGPSfile:
         csv_reader = csv.reader(DGPSfile, delimiter='\t')
         next(csv_reader)
@@ -369,9 +425,11 @@ def readDGPSfile(fileName):
             Lat.append(float(line[1]))
             Lon.append(float(line[2]))
             ToD.append(int(line[5][:2])*60*60 + int(line[5][3:5])*60 + float(line[5][6:11]))
-            
+            XY_UTM = latLon2local([Lat[-1], Lon[-1]])
+            X_UTM.append(XY_UTM[0])
+            Y_UTM.append(XY_UTM[1])
     
-    return [{'track': 0, 'data': {'Lat': Lat, 'Lon': Lon, 'ToD': ToD}}]
+    return [{'track': 0, 'data': {'Lat': Lat, 'Lon': Lon, 'ToD': ToD, 'X_UTM': X_UTM, 'Y_UTM': Y_UTM}}]
 
 
 def objectCorrelator(trackList, trackDGPS):
@@ -398,12 +456,12 @@ def objectCorrelator(trackList, trackDGPS):
 def main():
 
     asterixDecodedFile =  '/home/avidalh/Desktop/GNSS/DriveTests/SMR/20200129/200129-gcxo-230611.gps.json'
-    asterixDecodedFile =  '/home/avidalh/Desktop/GNSS/DriveTests/SMMS/20200129/200129-gcxo-230614.gps_mike6.json'
-    asterixDecodedFile =  '/home/avidalh/Desktop/GNSS/DriveTests/SMR/20200130/200130-gcxo-223713.gps.json'
-    asterixDecodedFile =  'recordings/200130-gcxo-223713.gps.json'
+    asterixDecodedFile =  'recordings/200129-gcxo-230614.gps_mike6.json'
+    #asterixDecodedFile =  '/home/avidalh/Desktop/GNSS/DriveTests/SMR/20200130/200130-gcxo-223713.gps.json'
+    #asterixDecodedFile =  'recordings/200130-gcxo-223713.gps.json'
     # asterixDecodedFile =  'recordings/080001.gps.json'
     
-    DGPStrackFile = 'recordings/20200130.cst'
+    DGPStrackFile = 'recordings/20200129.cst'
     # DGPStrackFile = 'recordings/20140220.txt'
 
 
@@ -435,48 +493,10 @@ def main():
     ))
 
     plotTrackListLatLon(trackList)
-    plotTrackDGPS(trackDGPS)
-
-
-    '''
-    for track in trackListMiss:
-        for j in range(len(track['data']['X'])):
-            plt.plot(track['data']['X'][j],
-                        track['data']['Y'][j],
-                        marker='v',
-                        mfc='k',
-                        ms=10,
-                        mec='k',
-                        linestyle='-',
-                        lw=.7, color='y',
-                        mew=.5,
-                        alpha=0.75)
-
-    for track in trackListBig:
-        for j in range(len(track['data']['X'])):
-            if track['data']['Length'][j] >= maxSize or track['data']['Width'][j] >= maxSize:
-                plt.plot(track['data']['X'][j],
-                        track['data']['Y'][j],
-                        marker='o',
-                        mfc='None',
-                        ms=track['data']['Length'][j]*.5,
-                        mec='cyan',
-                        linestyle='-',
-                        lw=.7, color='y',
-                        mew=.5,
-                        alpha=0.75)
-                plt.plot(track['data']['X'][j],
-                        track['data']['Y'][j],
-                        marker='o',
-                        mfc='None',
-                        ms=track['data']['Width'][j]*.5,
-                        mec='magenta',
-                        linestyle='-',
-                        lw=.7, color='y',
-                        mew=.5,
-                        alpha=.75)
-    '''
-
+    plotTrackList(trackList)
+    plotTrackListXY_calc(trackList)
+    plotTrackDGPS(trackDGPS, UTM=True)
+    plotTrackDGPS(trackDGPS, UTM=False)
 
     plt.title('Drive Test Analysis script, file {0}'.format(asterixDecodedFile))
     plt.text(0.85, 0.95, textStr, transform=plotXY.transAxes, fontsize=10, verticalalignment='top')
