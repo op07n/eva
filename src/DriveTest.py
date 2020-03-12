@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import matplotlib.pyplot as plt
-import datetime
+import time
 import csv
 from CoordConv import CoordTranslator
 import math
@@ -38,14 +38,17 @@ def readFile(fileName):
                     plotXY = {'X': None, 'Y': None}
                 try:
                     plotLL = e['CAT010']['I041']
-                    XY_UTM = latLon2local([plotLL['Lat'], plotLL['Lon']])
-                    X_UTM = XY_UTM[0]
-                    Y_UTM = XY_UTM[1]
+                    coordLocalUTM = latLon2local([plotLL['Lat'], plotLL['Lon']])
+                    X_UTM = coordLocalUTM[0]
+                    Y_UTM = coordLocalUTM[1]
+                    X_Local = coordLocalUTM[2]
+                    Y_Local = coordLocalUTM[3]
                 except:
                     plotLL = {'Lat': None, 'Lon': None}
                     X_UTM = None
                     Y_UTM = None
-
+                    X_Local = None
+                    Y_Local = None
 
                 # if plotLWO and plotXY:
                 track = {'track': trackNb,
@@ -58,7 +61,9 @@ def readFile(fileName):
                                      'Length': [plotLWO['Length']],
                                      'Ori': [plotLWO['Ori']],
                                      'X_UTM': [X_UTM],
-                                     'Y_UTM': [Y_UTM]
+                                     'Y_UTM': [Y_UTM],
+                                     'X_Local': [X_Local],
+                                     'Y_Local': [Y_Local]
                                     }
                             }
                 
@@ -75,13 +80,17 @@ def readFile(fileName):
                     plotXY = {'X': None, 'Y': None}
                 try:
                     plotLL = e['CAT010']['I041']
-                    XY_UTM = latLon2local([plotLL['Lat'], plotLL['Lon']])
-                    X_UTM = XY_UTM[0]
-                    Y_UTM = XY_UTM[1]
+                    coordLocalUTM = latLon2local([plotLL['Lat'], plotLL['Lon']])
+                    X_UTM = coordLocalUTM[0]
+                    Y_UTM = coordLocalUTM[1]
+                    X_Local = coordLocalUTM[2]
+                    Y_Local = coordLocalUTM[3]
                 except:
                     plotLL = {'Lat': None, 'Lon': None}
                     X_UTM = None
                     Y_UTM = None
+                    X_Local = None
+                    Y_Local = None
 
                 if plotLWO and plotXY:
                     trackList[trackIndices[trackNb]]['data']['ToD'].append(e['CAT010']['I140']['ToD'])
@@ -94,28 +103,56 @@ def readFile(fileName):
                     trackList[trackIndices[trackNb]]['data']['Ori'].append(plotLWO['Ori'])
                     trackList[trackIndices[trackNb]]['data']['X_UTM'].append(X_UTM)
                     trackList[trackIndices[trackNb]]['data']['Y_UTM'].append(Y_UTM)
-                    
+                    trackList[trackIndices[trackNb]]['data']['X_Local'].append(X_Local)
+                    trackList[trackIndices[trackNb]]['data']['Y_Local'].append(Y_Local)
+
     return trackList, trackIndices                    
 
 
-def latLon2local(coords, smr=True):
-    # smr_latlon = [28.477493, -16.332522]
-    # mlat_latlon = [28.482653, -16.341537]
-    # Kx = 0.9999
-    # Ky = 0.9998
-    # theta = -0.6488 * 2 * math.pi / 360
+def latLon2local(coords, sensor='smr'):
+
+    smr_latlon = [28.477496, -16.332520]
+    smr_height = 704.015  #helipsoid wgs84
+    smr_kx = 1.00075
+    smr_ky = .997
+    smr_theta = .58
+    smr_UTM = [369558.861, 3150822.214]
+    
+    mlat_latlon = [28.482653, -16.341537] 
+    mlat_height = 677.969 
+    mlat_kx = 1.0003#7  # 0.9999
+    mlat_ky = 1.0023 #.995
+    mlat_theta = 0.677  #0.685
+    mlat_UTM = [368682.455, 3151403.490]
+
+    sensorsLocations = {'smr': {'latLon': smr_latlon,
+                                'height': smr_height,
+                                'kx': smr_kx,
+                                'ky': smr_ky,
+                                'theta': smr_theta,
+                                'UTM': smr_UTM},
+                        'mlat': {'latLon': mlat_latlon,
+                                 'height': mlat_height,
+                                 'kx': mlat_kx,
+                                 'ky': mlat_ky,
+                                 'theta':mlat_theta,
+                                 'UTM': mlat_UTM}
+                        }
+
+    theta = sensorsLocations[sensor]['theta'] * math.pi / 180
+    sensorXY = sensorsLocations[sensor]['UTM']  # coordTrans.LLtoUTM(smr_latlon)[2:]
+    
     coordTrans = CoordTranslator()
-    # smr_xy = coordTrans.LLtoUTM(smr_latlon)[2:]
-    # temp1 = smr_xy[0] * math.cos(theta) - smr_xy[1] * math.sin(theta)
-    # temp2 = smr_xy[0] * math.sin(theta) + smr_xy[1] * math.cos(theta)
-    # smr_xy = [temp1 * Kx, temp2 * Ky]
+    Kx = sensorsLocations[sensor]['kx']
+    Ky = sensorsLocations[sensor]['ky']
+    pointCoorUTM = coordTrans.LLtoUTM(coords)[2:]
+    pointCoorLocal = [pointCoord - sensorCoord for pointCoord, sensorCoord in zip(pointCoorUTM, sensorXY)]
+    temp1 = pointCoorLocal[0] * math.cos(theta) - pointCoorLocal[1] * math.sin(theta)
+    temp2 = pointCoorLocal[0] * math.sin(theta) + pointCoorLocal[1] * math.cos(theta)
+    temp1 *= Kx
+    temp2 *= Ky
 
-    pointXY = coordTrans.LLtoUTM(coords)[2:]
-    # temp1 = pointXY[0] * math.cos(theta) - pointXY[1] * math.sin(theta)
-    # temp2 = pointXY[0] * math.sin(theta) + pointXY[1] * math.cos(theta)
-
-    # print([temp1 * Kx - smr_xy[0], temp2 * Ky - smr_xy[1]])
-    return pointXY    
+    return pointCoorUTM + [temp1, temp2]
 
 
 def calcStats(trackList, trackIndices, trackListBig, maxSize):
@@ -238,10 +275,10 @@ def plotTrackList(trackList):
 def plotTrackListXY_calc(trackList):
     # plot every track
     for i in range(len(trackList)):
-        plt.plot(trackList[i]['data']['X_UTM'],
-                 trackList[i]['data']['Y_UTM'],
+        plt.plot(trackList[i]['data']['X_Local'],
+                 trackList[i]['data']['Y_Local'],
                  marker='^',
-                 mfc='None',
+                 mfc='r',
                  ms=3,
                  mec='b',
                  linestyle='-',
@@ -253,8 +290,8 @@ def plotTrackListXY_calc(trackList):
     # plot the start point of every track in green
     for t in trackList:
         try:
-            plt.plot(t['data']['X_UTM'][0],
-                     t['data']['Y_UTM'][0],
+            plt.plot(t['data']['X_Local'][0],
+                     t['data']['Y_Local'][0],
                         marker='^',
                         mfc='g',
                         ms=3,
@@ -269,8 +306,8 @@ def plotTrackListXY_calc(trackList):
     # plot the ending point of every track in red
     for t in trackList:
         try:
-            plt.plot(t['data']['X_UTM'][-2],
-                     t['data']['Y_UTM'][-2],
+            plt.plot(t['data']['X_Local'][-2],
+                     t['data']['Y_Local'][-2],
                         marker='^',
                         mfc='r',
                         ms=3,
@@ -336,8 +373,8 @@ def plotTrackListLatLon(trackList):
 def plotTrackDGPS(trackList, UTM=True):
     # plot every track
     if UTM:
-        xkey = 'X_UTM'
-        ykey = 'Y_UTM'
+        xkey = 'X_Local'
+        ykey = 'Y_Local'
     else:
         xkey = 'Lon'
         ykey = 'Lat'
@@ -413,6 +450,8 @@ def readDGPSfile(fileName):
     Lon = []
     X_UTM = []
     Y_UTM = []
+    X_Local = []
+    Y_Local = []
     ToD = []
     # track = {}
     # coordTrans = CoordTranslator()
@@ -428,27 +467,39 @@ def readDGPSfile(fileName):
             XY_UTM = latLon2local([Lat[-1], Lon[-1]])
             X_UTM.append(XY_UTM[0])
             Y_UTM.append(XY_UTM[1])
+            X_Local.append(XY_UTM[2])
+            Y_Local.append(XY_UTM[3])
+            
     
-    return [{'track': 0, 'data': {'Lat': Lat, 'Lon': Lon, 'ToD': ToD, 'X_UTM': X_UTM, 'Y_UTM': Y_UTM}}]
+    return [{'track': 0, 'data': {'Lat': Lat, 'Lon': Lon,
+                                  'ToD': ToD,
+                                  'X_UTM': X_UTM, 'Y_UTM': Y_UTM,
+                                  'X_Local': X_Local, 'Y_Local': Y_Local
+                                 }
+            }]
 
 
 def objectCorrelator(trackList, trackDGPS):
     '''
     correlates plots and DGPS points.
-
     '''
     maxTimeOffset = 0.5
-    maxSeparation = 15
+    maxSeparation = 10
     trackListOutput = []
     for track in trackList:
-        for points in trackDGPS:
-            for timeStampt in points['data']['ToD']:
-                if abs(track['data']['ToD'][0] - timeStampt) < maxTimeOffset:
-                    indexPoint = points['data']['ToD'].index(timeStampt)
+        # for points in trackDGPS:
+        for timeStampt, X, Y in zip(trackDGPS[0]['data']['ToD'], trackDGPS[0]['data']['X_Local'], trackDGPS[0]['data']['Y_Local']):
+            if abs(track['data']['ToD'][0] - timeStampt) < maxTimeOffset:
+                if (abs(track['data']['X_Local'][0]-X) < maxSeparation) and (abs(track['data']['Y_Local'][0]-Y) < maxSeparation):
+                    indexPoint = trackDGPS[0]['data']['ToD'].index(timeStampt)
                     sizeArray = len(track['data']['ToD'])
-                    track['data']['ToDDGPS'] = points['data']['ToD'][indexPoint:indexPoint+sizeArray]
-                    track['data']['LatDGPS'] = points['data']['Lat'][indexPoint:indexPoint+sizeArray]
-                    track['data']['LonDGPS'] = points['data']['Lon'][indexPoint:indexPoint+sizeArray]
+                    track['data']['ToDDGPS'] = trackDGPS[0]['data']['ToD'][indexPoint:indexPoint+sizeArray]
+                    track['data']['LatDGPS'] = trackDGPS[0]['data']['Lat'][indexPoint:indexPoint+sizeArray]
+                    track['data']['LonDGPS'] = trackDGPS[0]['data']['Lon'][indexPoint:indexPoint+sizeArray]
+                    track['data']['X_UTM_DGPS'] = trackDGPS[0]['data']['X_UTM'][indexPoint:indexPoint+sizeArray]
+                    track['data']['Y_UTM_DGPS'] = trackDGPS[0]['data']['Y_UTM'][indexPoint:indexPoint+sizeArray]
+                    track['data']['X_LocalDGPS'] = trackDGPS[0]['data']['X_Local'][indexPoint:indexPoint+sizeArray]
+                    track['data']['Y_LocalDGPS'] = trackDGPS[0]['data']['Y_Local'][indexPoint:indexPoint+sizeArray]
                     trackListOutput.append(track)
                     break
     return trackListOutput
@@ -458,10 +509,10 @@ def main():
     asterixDecodedFile =  '/home/avidalh/Desktop/GNSS/DriveTests/SMR/20200129/200129-gcxo-230611.gps.json'
     asterixDecodedFile =  'recordings/200129-gcxo-230614.gps_mike6.json'
     #asterixDecodedFile =  '/home/avidalh/Desktop/GNSS/DriveTests/SMR/20200130/200130-gcxo-223713.gps.json'
-    #asterixDecodedFile =  'recordings/200130-gcxo-223713.gps.json'
+    asterixDecodedFile =  'recordings/200130-gcxo-223713.gps.json'
     # asterixDecodedFile =  'recordings/080001.gps.json'
     
-    DGPStrackFile = 'recordings/20200129.cst'
+    DGPStrackFile = 'recordings/20200130.cst'
     # DGPStrackFile = 'recordings/20140220.txt'
 
 
@@ -492,7 +543,7 @@ def main():
         r'$PD: %.2f$' % ((totalPlots-totalMissed)/totalPlots*100)
     ))
 
-    plotTrackListLatLon(trackList)
+    # plotTrackListLatLon(trackList)
     plotTrackList(trackList)
     plotTrackListXY_calc(trackList)
     plotTrackDGPS(trackDGPS, UTM=True)
@@ -508,8 +559,11 @@ def main():
     # plt.xlim([-2700, 1000])
     plt.autoscale(enable=False)
 
+    print("--- %s seconds ---" % (time.time() - start_time))
+
     plt.show()
 
 
 if __name__ == '__main__':
+    start_time = time.time()
     main()
