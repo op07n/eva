@@ -5,6 +5,9 @@ import time
 import csv
 from CoordConv import CoordTranslator
 import math
+# from scipy.interpolate import interp1d
+import statistics
+
 
 def readFile(fileName):
     '''
@@ -223,11 +226,24 @@ def onclick(event):
     print('onpick points: ')
 
 
-def plotTrackList(trackList):
-    # plot every track
+def plotTrackList(trackList, option='corrLocal'):
+
+    if option == 'local':
+        xkey = 'X_Local'
+        ykey = 'Y_Local'
+    elif option == 'latLon':
+        xkey = 'Lon'
+        ykey = 'Lat'
+    elif option == 'corrLocal':
+        xkey = 'X_Local_DGPS'
+        ykey = 'Y_Local_DGPS'
+    elif option == 'local_adjusted':
+        xkey = 'X_Local_DGPS_adjusted'
+        ykey = 'Y_Local_DGPS_adjusted'
+
     for i in range(len(trackList)):
-        plt.plot(trackList[i]['data']['X'],
-                 trackList[i]['data']['Y'],
+        plt.plot(trackList[i]['data'][xkey],
+                 trackList[i]['data'][ykey],
                  marker='^',
                  mfc='None',
                  ms=3,
@@ -238,11 +254,19 @@ def plotTrackList(trackList):
                  mew=.5,
                  pickradius=5,
                  picker=None)
+
+    for j in range(len(trackList)):
+        for i in range(0, len(trackList[j]['data']['ToD']), 5):
+            plt.text(trackList[j]['data'][xkey][i],
+                    trackList[j]['data'][ykey][i],
+                    str(int(trackList[j]['data']['ToD'][i]))[-2:],
+                    fontsize=5)
+
     # plot the start point of every track in green
     for t in trackList:
         try:
-            plt.plot(t['data']['X'][0],
-                     t['data']['Y'][0],
+            plt.plot(t['data'][xkey][0],
+                     t['data'][ykey][0],
                         marker='^',
                         mfc='g',
                         ms=3,
@@ -257,8 +281,8 @@ def plotTrackList(trackList):
     # plot the ending point of every track in red
     for t in trackList:
         try:
-            plt.plot(t['data']['X'][-2],
-                     t['data']['Y'][-2],
+            plt.plot(t['data'][xkey][-2],
+                     t['data'][ykey][-2],
                         marker='^',
                         mfc='r',
                         ms=3,
@@ -370,19 +394,57 @@ def plotTrackListLatLon(trackList):
             continue
 
 
-def plotTrackDGPS(trackList, UTM=True):
+def plotTrackDGPS_adjusted(trackList):
+    for i in range(len(trackList)):
+        plt.plot(trackList[i]['data']['X_Local_DGPS_adjusted'],
+                 trackList[i]['data']['Y_Local_DGPS_adjusted'],
+                 marker='+',
+                 mfc='k',
+                 ms=5,
+                 mec='k',
+                 linestyle='-',
+                 lw=.0,
+                 color='grey',
+                 mew=.5,
+                 pickradius=5,
+                 picker=None)
+
+
+def plotErrorLines(trackList):
+    for i in range(len(trackList)):
+        for j in range(len(trackList[i]['data']['X_Local'])):
+            plt.plot([trackList[i]['data']['X_Local'][j], trackList[i]['data']['X_Local_DGPS_adjusted'][j]],
+                     [trackList[i]['data']['Y_Local'][j], trackList[i]['data']['Y_Local_DGPS_adjusted'][j]],
+                     marker='^',
+                     mfc='grey',
+                     ms=0,
+                     mec='grey',
+                     linestyle='-',
+                     lw=.3,
+                     color='r',
+                     mew=.5,
+                     pickradius=5,
+                     picker=None)
+
+
+def plotTrackDGPS(trackList, option='local'):
     # plot every track
-    if UTM:
+    
+    if option == 'local':
         xkey = 'X_Local'
         ykey = 'Y_Local'
-    else:
+    elif option == 'latLon':
         xkey = 'Lon'
         ykey = 'Lat'
+    elif option == 'corrLocal':
+        xkey = 'X_Local_DGPS'
+        ykey = 'Y_Local_DGPS'
+    
     for i in range(len(trackList)):
         plt.plot(trackList[i]['data'][xkey],
                  trackList[i]['data'][ykey],
-                 marker='x',
-                 mfc='None',
+                 marker='o',
+                 mfc='w',
                  ms=3,
                  mec='grey',
                  linestyle='-',
@@ -397,9 +459,9 @@ def plotTrackDGPS(trackList, UTM=True):
             plt.plot(t['data'][xkey][0],
                      t['data'][ykey][0],
                         marker='x',
-                        mfc='grey',
-                        ms=3,
-                        mec='grey',
+                        mfc='g',
+                        ms=6,
+                        mec='g',
                         linestyle='-',
                         lw=.7,
                         color='grey',
@@ -412,9 +474,9 @@ def plotTrackDGPS(trackList, UTM=True):
         try:
             plt.plot(t['data'][xkey][-2],
                      t['data'][ykey][-2],
-                        marker='^',
+                        marker='x',
                         mfc='r',
-                        ms=3,
+                        ms=6,
                         mec='r',
                         linestyle='-',
                         lw=.7,
@@ -479,62 +541,173 @@ def readDGPSfile(fileName):
             }]
 
 
-def objectCorrelator(trackList, trackDGPS):
+def objectCorrelator(trackList, tracksDGPS):
     '''
     correlates plots and DGPS points.
+
     '''
     maxTimeOffset = 0.5
-    maxSeparation = 10
+    maxSeparation = 30
     trackListOutput = []
-    for track in trackList:
-        # for points in trackDGPS:
-        for timeStampt, X, Y in zip(trackDGPS[0]['data']['ToD'], trackDGPS[0]['data']['X_Local'], trackDGPS[0]['data']['Y_Local']):
-            if abs(track['data']['ToD'][0] - timeStampt) < maxTimeOffset:
-                if (abs(track['data']['X_Local'][0]-X) < maxSeparation) and (abs(track['data']['Y_Local'][0]-Y) < maxSeparation):
-                    indexPoint = trackDGPS[0]['data']['ToD'].index(timeStampt)
-                    sizeArray = len(track['data']['ToD'])
-                    track['data']['ToDDGPS'] = trackDGPS[0]['data']['ToD'][indexPoint:indexPoint+sizeArray]
-                    track['data']['LatDGPS'] = trackDGPS[0]['data']['Lat'][indexPoint:indexPoint+sizeArray]
-                    track['data']['LonDGPS'] = trackDGPS[0]['data']['Lon'][indexPoint:indexPoint+sizeArray]
-                    track['data']['X_UTM_DGPS'] = trackDGPS[0]['data']['X_UTM'][indexPoint:indexPoint+sizeArray]
-                    track['data']['Y_UTM_DGPS'] = trackDGPS[0]['data']['Y_UTM'][indexPoint:indexPoint+sizeArray]
-                    track['data']['X_LocalDGPS'] = trackDGPS[0]['data']['X_Local'][indexPoint:indexPoint+sizeArray]
-                    track['data']['Y_LocalDGPS'] = trackDGPS[0]['data']['Y_Local'][indexPoint:indexPoint+sizeArray]
+
+    for trackDGPS in tracksDGPS:
+        ToD_DGPS_interval = [trackDGPS['data']['ToD'][0], trackDGPS['data']['ToD'][-1]]
+        for track in trackList:
+            ToD_track_interval = [track['data']['ToD'][0], track['data']['ToD'][-1]]
+
+            # time prefiltering
+            if ToD_DGPS_interval[1] < ToD_DGPS_interval[0]:
+                ToD_DGPS_interval = [0, 86400]
+            if min(ToD_DGPS_interval) > max(ToD_track_interval) or max(ToD_DGPS_interval) < min(ToD_track_interval):
+                print("track not valid...", ToD_DGPS_interval, ToD_track_interval)
+                continue
+
+            validTrack = False
+            ToD = []
+            ToD_DGPS = []
+            LatDGPS = []
+            LonDGPS = []
+            Lat = []
+            Lon = []
+            X_UTM_DGPS = []
+            Y_UTM_DGPS = []
+            X_UTM = []
+            Y_UTM = []
+            X_Local_DGPS = []
+            Y_Local_DGPS = []
+            X_Local = []
+            Y_Local = []
+            X_Local_DGPS_adjusted = []
+            Y_Local_DGPS_adjusted = []
+            error_X = []
+            error_Y = []
+            error_rho = []
+            error_theta = []
+            error_RMSE = []
+            gapCounter = 0
+
+            for i in range(len(trackDGPS['data']['ToD'])):
+                for j in range(len(track['data']['ToD'])):
+                    if abs(trackDGPS['data']['ToD'][i] - track['data']['ToD'][j]) < maxTimeOffset:
+                        if track['data']['X_Local'][j] != None:
+                            if abs(trackDGPS['data']['X_Local'][i] - track['data']['X_Local'][j]) < maxSeparation:
+                                if abs(trackDGPS['data']['Y_Local'][i] - track['data']['Y_Local'][j]) < maxSeparation:
+                                    validTrack = True
+
+                                    deltaX = trackDGPS['data']['X_Local'][i+1] - trackDGPS['data']['X_Local'][i]
+                                    deltaY = trackDGPS['data']['Y_Local'][i+1] - trackDGPS['data']['Y_Local'][i]
+                                    sampleTime = trackDGPS['data']['ToD'][i+1] - trackDGPS['data']['ToD'][i]
+                                    Vx = deltaX / sampleTime
+                                    Vy = deltaY / sampleTime
+                                    deltaTime = abs(trackDGPS['data']['ToD'][i] - track['data']['ToD'][j])
+                                    X_Local_DGPS_adjusted.append(Vx * deltaTime + trackDGPS['data']['X_Local'][i])
+                                    Y_Local_DGPS_adjusted.append(Vy * deltaTime + trackDGPS['data']['Y_Local'][i])
+                                    
+                                    
+                                    
+                                    ToD_DGPS.append(trackDGPS['data']['ToD'][i])
+                                    ToD.append(track['data']['ToD'][j])
+                                    LatDGPS.append(trackDGPS['data']['Lat'][i])
+                                    LonDGPS.append(trackDGPS['data']['Lon'][i])
+                                    Lat.append(track['data']['Lat'][j])
+                                    Lon.append(track['data']['Lon'][j])
+                                    X_UTM_DGPS.append(trackDGPS['data']['X_UTM'][i])
+                                    Y_UTM_DGPS.append(trackDGPS['data']['Y_UTM'][i])
+                                    X_UTM.append(track['data']['X_UTM'][j])
+                                    Y_UTM.append(track['data']['Y_UTM'][j])
+                                    X_Local_DGPS.append(trackDGPS['data']['X_Local'][i])
+                                    Y_Local_DGPS.append(trackDGPS['data']['Y_Local'][i])
+                                    X_Local.append(track['data']['X_Local'][j])
+                                    Y_Local.append(track['data']['Y_Local'][j])
+
+                                    error_X.append(X_Local_DGPS_adjusted[-1] - X_Local[-1])
+                                    error_Y.append(Y_Local_DGPS_adjusted[-1] - Y_Local[-1])
+                                    error_RMSE.append(math.sqrt(error_X[-1]*error_X[-1] + error_Y[-1]*error_Y[-1]))
+
+                                    # continue
+                                else:
+                                    gapCounter += 1
+                            else:
+                                gapCounter += 1
+                        else:
+                            gapCounter += 1
+
+            track['data']['ToDDGPS'] = ToD_DGPS
+            track['data']['ToD'] = ToD
+            track['data']['LatDGPS'] = LatDGPS
+            track['data']['LonDGPS'] = LonDGPS
+            track['data']['Lat'] = Lat
+            track['data']['Lon'] = Lon
+            track['data']['X_UTM_DGPS'] = X_UTM_DGPS
+            track['data']['Y_UTM_DGPS'] = Y_UTM_DGPS
+            track['data']['X_UTM'] = X_UTM
+            track['data']['Y_UTM'] = Y_UTM
+            track['data']['X_Local_DGPS'] = X_Local_DGPS
+            track['data']['Y_Local_DGPS'] = Y_Local_DGPS
+            track['data']['X_Local'] = X_Local
+            track['data']['Y_Local'] = Y_Local
+            track['data']['X_Local_DGPS_adjusted'] = X_Local_DGPS_adjusted
+            track['data']['Y_Local_DGPS_adjusted'] = Y_Local_DGPS_adjusted
+            track['data']['error_X'] = error_X
+            track['data']['error_Y'] = error_Y
+            track['data']['error_RMSE'] = error_RMSE           
+
+            # check if the track is valid with not many gaps...
+            if validTrack:
+                # print(gapCounter)
+                if gapCounter <= 0.1 * len(track['data']['X_Local_DGPS_adjusted']):
                     trackListOutput.append(track)
-                    break
+
     return trackListOutput
+
 
 def main():
 
-    asterixDecodedFile =  '/home/avidalh/Desktop/GNSS/DriveTests/SMR/20200129/200129-gcxo-230611.gps.json'
-    asterixDecodedFile =  'recordings/200129-gcxo-230614.gps_mike6.json'
-    #asterixDecodedFile =  '/home/avidalh/Desktop/GNSS/DriveTests/SMR/20200130/200130-gcxo-223713.gps.json'
-    asterixDecodedFile =  'recordings/200130-gcxo-223713.gps.json'
+    asterixDecodedFile =  'recordings/200129-gcxo-230611.gps.json'  # smr
+    # asterixDecodedFile =  'recordings/200129-gcxo-230614.gps.json'  # smr
+    # asterixDecodedFile =  'recordings/200129-gcxo-230614.gps_mike6.json'  # mlat
+    asterixDecodedFile =  'recordings/200130-gcxo-223716.gps_mike5.json'  # mlat
+    # asterixDecodedFile =  'recordings/200130-gcxo-223713.gps.json'
     # asterixDecodedFile =  'recordings/080001.gps.json'
     
+    # DGPStrackFile = 'recordings/20200129.cst'
     DGPStrackFile = 'recordings/20200130.cst'
     # DGPStrackFile = 'recordings/20140220.txt'
 
-
     trackList, trackIndices = readFile(asterixDecodedFile)
-    trackDGPS = readDGPSfile(DGPStrackFile)
+    tracksDGPS = readDGPSfile(DGPStrackFile)
 
-    trackList = objectCorrelator(trackList, trackDGPS)
+    trackList = objectCorrelator(trackList, tracksDGPS)
+    
+    # TODO: implement in a function:
+    emx = []
+    emy = []
+    ermse = []
+    try:
+        for track in trackList:
+            emx.append(statistics.mean(track['data']['error_X']))
+            emy.append(statistics.mean(track['data']['error_Y']))
+            ermse.append(statistics.mean(track['data']['error_RMSE']))
+        print('mean error X: ', statistics.mean(emx))
+        print('mean error Y: ', statistics.mean(emy))
+        print('mean error RMSE: ', statistics.mean(ermse))
+    except:
+        print()
 
     #plotSizeHist(trackList)
 
     inches = 16
+
+    
+
     fig, plotXY = plt.subplots(1, 1, figsize=(inches, inches/1.7778), frameon=True)
-
+    
     cid = fig.canvas.mpl_connect('button_press_event', onclick)
-
-    j = 0
-    plotList = []
 
     maxSize = 70
 
     trackListBig = getBiggest(trackList, trackIndices, maxSize)
-    totalTracks, totalPlots, totalMissed, totalBig, trackListMiss= calcStats(trackList, trackIndices, trackListBig, maxSize)
+    totalTracks, totalPlots, totalMissed, totalBig, trackListMiss = calcStats(trackList, trackIndices, trackListBig, maxSize)
     textStr = '\n'.join((
         r'$Tracks: %2d$' % (totalTracks),
         r'$Plots: %2d$' % (totalPlots),
@@ -544,10 +717,13 @@ def main():
     ))
 
     # plotTrackListLatLon(trackList)
-    plotTrackList(trackList)
-    plotTrackListXY_calc(trackList)
-    plotTrackDGPS(trackDGPS, UTM=True)
-    plotTrackDGPS(trackDGPS, UTM=False)
+    # plotTrackList(trackList, option='local')
+    # plotTrackListXY_calc(trackList)
+    plotTrackDGPS(tracksDGPS, option='local')
+    # plotTrackDGPS(trackDGPS, option='corrLocal')
+    # plotTrackList(trackList, option='corrLocal')
+    plotTrackList(trackList, option='local')
+    plotTrackDGPS_adjusted(trackList)
 
     plt.title('Drive Test Analysis script, file {0}'.format(asterixDecodedFile))
     plt.text(0.85, 0.95, textStr, transform=plotXY.transAxes, fontsize=10, verticalalignment='top')
@@ -558,7 +734,38 @@ def main():
     # plt.ylim([-250, 1350])
     # plt.xlim([-2700, 1000])
     plt.autoscale(enable=False)
+    plotErrorLines(trackList)
+    
+    fig2, hist = plt.subplots(2, 3, figsize=(inches, inches/1.7778), frameon=True)
+    
+    errorArrayX = []
+    for track in trackList:
+        errorArrayX += track['data']['error_X'][:]
+    hist[0, 0].hist(errorArrayX, bins=200, density=True)
+    hist[0, 0].grid(linestyle='--', linewidth=0.5)
 
+    errorArrayY = []
+    for track in trackList:
+        errorArrayY += track['data']['error_Y'][:]
+    hist[0, 1].grid(linestyle='--', linewidth=0.5)
+    hist[0, 1].hist(errorArrayY, bins=200, density=True)
+    
+
+    errorArrayRMSE = []
+    for track in trackList:
+        errorArrayRMSE += track['data']['error_RMSE'][:]
+    hist[0, 2].hist(errorArrayRMSE, bins=200, density=True)
+    hist[0, 2].grid(linestyle='--', linewidth=0.5)
+
+    errorArray = []
+    for track in trackList:
+        errorArray += track['data']['error_RMSE'][:]
+    hist[1, 0].scatter(errorArrayX, errorArrayY, marker='o', s=30, alpha=0.2)
+    hist[1, 0].grid(linestyle='--', linewidth=0.5)
+    hist[1, 0].axis('equal')
+
+    
+    
     print("--- %s seconds ---" % (time.time() - start_time))
 
     plt.show()
